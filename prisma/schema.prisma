@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  COMMERCIAL_SPACE
+  OFFICE
+  LAND
+}
+
+enum OperationType {
+  RENT
+  SALE
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RENTED_OR_SOLD
+  CANCELLED
+}
+
+enum NotificationType {
+  NEW_MESSAGE
+  NEW_OFFER
+}
+
+enum NotificationStatus {
+  PENDING
+  READ
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  properties               Property[]     @relation("AdminProperties")
+  conversationsAsClient    Conversation[] @relation("ClientConversations")
+  conversationsAsAdmin     Conversation[] @relation("AdminConversations")
+  messages                 Message[]      @relation("MessageAuthor")
+  notifications            Notification[]
+}
+
+model Property {
+  id            String         @id @default(uuid())
+  adminId       String
+  admin         User           @relation("AdminProperties", fields: [adminId], references: [id])
+  title         String
+  description   String
+  address       String
+  city          String
+  type          PropertyType
+  operationType OperationType
+  price         Decimal        @db.Decimal(12, 2)
+  status        PropertyStatus @default(AVAILABLE)
+  bedrooms      Int?
+  bathrooms     Int?
+  squareMeters  Decimal?       @db.Decimal(10, 2)
+  images        String[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  conversations Conversation[]
+
+  @@index([status, type, city])
+}
+
+model Conversation {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  clientId   String
+  client     User     @relation("ClientConversations", fields: [clientId], references: [id])
+  adminId    String
+  admin      User     @relation("AdminConversations", fields: [adminId], references: [id])
+  createdAt  DateTime @default(now())
+
+  messages Message[]
+
+  @@unique([propertyId, clientId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  authorId       String
+  author         User         @relation("MessageAuthor", fields: [authorId], references: [id])
+  content        String
+  offerAmount    Decimal?     @db.Decimal(12, 2)
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  notifications Notification[]
+
+  @@index([conversationId, createdAt])
+}
+
+model Notification {
+  id              String             @id @default(uuid())
+  recipientUserId String
+  recipient       User               @relation(fields: [recipientUserId], references: [id])
+  type            NotificationType
+  messageId       String?
+  message         Message?           @relation(fields: [messageId], references: [id])
+  text            String
+  status          NotificationStatus @default(PENDING)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([recipientUserId, status])
+}

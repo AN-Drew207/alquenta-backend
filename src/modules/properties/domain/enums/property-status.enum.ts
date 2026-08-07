@@ -1,0 +1,5 @@
+export enum PropertyStatus {
+  AVAILABLE = 'AVAILABLE',
+  RENTED_OR_SOLD = 'RENTED_OR_SOLD',
+  CANCELLED = 'CANCELLED',
+}

@@ -30,8 +30,8 @@ async function bootstrap() {
   app.useGlobalFilters(new DomainExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Gestión Inmueble API')
-    .setDescription('Property marketplace — REST API')
+    .setTitle('Alquenta API')
+    .setDescription('Alquenta — property marketplace REST API')
     .setVersion('1.0')
     .addCookieAuth('access_token')
     .build();

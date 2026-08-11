@@ -43,7 +43,8 @@ describe('Messaging (e2e)', () => {
         title: 'E2E Messaging Property',
         description: 'desc',
         address: 'addr',
-        city: 'Cordoba',
+        state: 'Miranda',
+        municipality: 'Baruta',
         type: 'HOUSE',
         operationType: 'SALE',
         price: 100000,
@@ -71,15 +72,15 @@ describe('Messaging (e2e)', () => {
     await app.close();
   });
 
-  it('lets a CLIENT contact/offer on an available property', async () => {
+  it('lets a CLIENT contact an available property', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/conversations')
       .set('Cookie', clientCookie)
-      .send({ propertyId, content: 'Is this available?', offerAmount: 90000 })
+      .send({ propertyId, content: 'Is this available?' })
       .expect(201);
 
     expect(res.body.conversation.propertyId).toBe(propertyId);
-    expect(res.body.message.offerAmount).toBe(90000);
+    expect(res.body.message.content).toBe('Is this available?');
   });
 
   it('rejects an ADMIN starting a conversation (CLIENT only)', () => {

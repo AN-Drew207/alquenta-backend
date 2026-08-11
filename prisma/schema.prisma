@@ -37,7 +37,6 @@ enum PropertyStatus {
 
 enum NotificationType {
   NEW_MESSAGE
-  NEW_OFFER
 }
 
 enum NotificationStatus {
@@ -69,21 +68,24 @@ model Property {
   title         String
   description   String
   address       String
-  city          String
+  state         String
+  municipality  String
   type          PropertyType
   operationType OperationType
   price         Decimal        @db.Decimal(12, 2)
   status        PropertyStatus @default(AVAILABLE)
   bedrooms      Int?
   bathrooms     Int?
+  parkingSpaces Int?
   squareMeters  Decimal?       @db.Decimal(10, 2)
   images        String[]
+  videos        String[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   conversations Conversation[]
 
-  @@index([status, type, city])
+  @@index([status, type, state, municipality])
 }
 
 model Conversation {
@@ -108,7 +110,6 @@ model Message {
   authorId       String
   author         User         @relation("MessageAuthor", fields: [authorId], references: [id])
   content        String
-  offerAmount    Decimal?     @db.Decimal(12, 2)
   read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -125,6 +126,7 @@ model Notification {
   type            NotificationType
   messageId       String?
   message         Message?           @relation(fields: [messageId], references: [id])
+  conversationId  String?
   text            String
   status          NotificationStatus @default(PENDING)
   createdAt       DateTime           @default(now())

@@ -7,13 +7,16 @@ export class PublishPropertyCommand {
     readonly title: string,
     readonly description: string,
     readonly address: string,
-    readonly city: string,
+    readonly state: string,
+    readonly municipality: string,
     readonly type: PropertyType,
     readonly operationType: OperationType,
     readonly price: number,
     readonly bedrooms?: number,
     readonly bathrooms?: number,
+    readonly parkingSpaces?: number,
     readonly squareMeters?: number,
     readonly images?: string[],
+    readonly videos?: string[],
   ) {}
 }

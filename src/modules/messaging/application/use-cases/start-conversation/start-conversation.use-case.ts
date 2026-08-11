@@ -4,6 +4,7 @@ import { UnitOfWork } from '../../../../../shared/domain/transaction/unit-of-wor
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { PropertyRepository } from '../../../../properties/domain/repositories/property.repository';
 import { PropertyStatus } from '../../../../properties/domain/enums/property-status.enum';
+import { UserRepository } from '../../../../auth/domain/repositories/user.repository';
 import { NotificationRepository } from '../../../../notifications/domain/repositories/notification.repository';
 import { Notification } from '../../../../notifications/domain/entities/notification.entity';
 import { NotificationType } from '../../../../notifications/domain/enums/notification-type.enum';
@@ -30,6 +31,7 @@ export class StartConversationUseCase
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
     private readonly propertyRepository: PropertyRepository,
+    private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
     private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     private readonly unitOfWork: UnitOfWork,
@@ -47,6 +49,9 @@ export class StartConversationUseCase
     if (property.status !== PropertyStatus.AVAILABLE) {
       throw new PropertyNotAvailableException(command.propertyId);
     }
+
+    const client = await this.userRepository.findById(command.clientId);
+    const clientName = client?.name ?? 'Un cliente';
 
     const candidate = Conversation.create({
       propertyId: property.id,
@@ -68,19 +73,15 @@ export class StartConversationUseCase
         conversationId: conversation.id,
         authorId: command.clientId,
         content: command.content,
-        offerAmount: command.offerAmount,
       });
       await this.messageRepository.save(message, ctx);
 
       notification = Notification.create({
         recipientUserId: property.adminId,
-        type: command.offerAmount
-          ? NotificationType.NEW_OFFER
-          : NotificationType.NEW_MESSAGE,
-        text: command.offerAmount
-          ? `New offer of $${command.offerAmount} on your property listing`
-          : 'New message about your property listing',
+        type: NotificationType.NEW_MESSAGE,
+        text: `${clientName} te escribió sobre "${property.title}"`,
         messageId: message.id,
+        conversationId: conversation.id,
       });
       await this.notificationRepository.save(notification, ctx);
     });

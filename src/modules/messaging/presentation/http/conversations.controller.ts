@@ -31,7 +31,7 @@ export class ConversationsController {
 
   @ApiOperation({
     summary:
-      'Contact/offer on a property (CLIENT only). Reuses the existing conversation for this client+property if one already exists.',
+      'Contact a property owner (CLIENT only). Reuses the existing conversation for this client+property if one already exists.',
   })
   @Roles(Role.CLIENT)
   @Post()
@@ -40,12 +40,7 @@ export class ConversationsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<StartConversationResponseDto> {
     const result = await this.startConversationUseCase.execute(
-      new StartConversationCommand(
-        dto.propertyId,
-        user.id,
-        dto.content,
-        dto.offerAmount,
-      ),
+      new StartConversationCommand(dto.propertyId, user.id, dto.content),
     );
     return {
       conversation: ConversationResponseMapper.toDto(result.conversation),
@@ -90,7 +85,7 @@ export class ConversationsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
     const message = await this.replyToConversationUseCase.execute(
-      new ReplyToConversationCommand(id, user.id, dto.content, dto.offerAmount),
+      new ReplyToConversationCommand(id, user.id, dto.content),
     );
     return MessageResponseMapper.toDto(message);
   }

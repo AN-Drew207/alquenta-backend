@@ -27,4 +27,16 @@ export class PrismaMessageRepository implements MessageRepository {
     });
     return rows.map(MessageMapper.toDomain);
   }
+
+  async markAsReadExcludingAuthor(
+    conversationId: string,
+    readerId: string,
+    ctx?: TransactionContext,
+  ): Promise<void> {
+    const client = (ctx as Prisma.TransactionClient | undefined) ?? this.prisma;
+    await client.message.updateMany({
+      where: { conversationId, authorId: { not: readerId }, read: false },
+      data: { read: true },
+    });
+  }
 }

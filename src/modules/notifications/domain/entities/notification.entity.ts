@@ -8,6 +8,7 @@ export class Notification {
     private readonly _recipientUserId: string,
     private readonly _type: NotificationType,
     private readonly _messageId: string | null,
+    private readonly _conversationId: string | null,
     private readonly _text: string,
     private _status: NotificationStatus,
     private readonly _createdAt: Date,
@@ -18,12 +19,14 @@ export class Notification {
     type: NotificationType;
     text: string;
     messageId?: string | null;
+    conversationId?: string | null;
   }): Notification {
     return new Notification(
       randomUUID(),
       params.recipientUserId,
       params.type,
       params.messageId ?? null,
+      params.conversationId ?? null,
       params.text,
       NotificationStatus.PENDING,
       new Date(),
@@ -35,6 +38,7 @@ export class Notification {
     recipientUserId: string;
     type: NotificationType;
     messageId: string | null;
+    conversationId: string | null;
     text: string;
     status: NotificationStatus;
     createdAt: Date;
@@ -44,6 +48,7 @@ export class Notification {
       params.recipientUserId,
       params.type,
       params.messageId,
+      params.conversationId,
       params.text,
       params.status,
       params.createdAt,
@@ -72,6 +77,10 @@ export class Notification {
 
   get messageId(): string | null {
     return this._messageId;
+  }
+
+  get conversationId(): string | null {
+    return this._conversationId;
   }
 
   get text(): string {

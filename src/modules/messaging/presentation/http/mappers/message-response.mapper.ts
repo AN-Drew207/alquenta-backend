@@ -8,7 +8,6 @@ export class MessageResponseMapper {
       conversationId: message.conversationId,
       authorId: message.authorId,
       content: message.content,
-      offerAmount: message.offerAmount,
       read: message.read,
       createdAt: message.createdAt,
     };

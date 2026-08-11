@@ -27,6 +27,11 @@ export class ListConversationMessagesUseCase
       throw new NotConversationParticipantException(query.conversationId);
     }
 
+    await this.messageRepository.markAsReadExcludingAuthor(
+      query.conversationId,
+      query.requesterId,
+    );
+
     return this.messageRepository.findManyByConversation(query.conversationId);
   }
 }

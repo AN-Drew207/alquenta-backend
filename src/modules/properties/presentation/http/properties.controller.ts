@@ -52,7 +52,13 @@ export class PropertiesController {
     const properties = await this.listUseCase.execute({
       status: PropertyStatus.AVAILABLE,
       type: query.type,
-      city: query.city,
+      state: query.state,
+      municipality: query.municipality,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      bedrooms: query.bedrooms,
+      bathrooms: query.bathrooms,
+      parkingSpaces: query.parkingSpaces,
     });
     return properties.map(PropertyResponseMapper.toDto);
   }
@@ -92,14 +98,17 @@ export class PropertiesController {
         dto.title,
         dto.description,
         dto.address,
-        dto.city,
+        dto.state,
+        dto.municipality,
         dto.type,
         dto.operationType,
         dto.price,
         dto.bedrooms,
         dto.bathrooms,
+        dto.parkingSpaces,
         dto.squareMeters,
         dto.images,
+        dto.videos,
       ),
     );
     return PropertyResponseMapper.toDto(property);

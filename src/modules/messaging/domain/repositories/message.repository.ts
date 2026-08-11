@@ -4,4 +4,9 @@ import { Message } from '../entities/message.entity';
 export abstract class MessageRepository {
   abstract save(message: Message, ctx?: TransactionContext): Promise<void>;
   abstract findManyByConversation(conversationId: string): Promise<Message[]>;
+  abstract markAsReadExcludingAuthor(
+    conversationId: string,
+    readerId: string,
+    ctx?: TransactionContext,
+  ): Promise<void>;
 }

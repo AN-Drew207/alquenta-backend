@@ -11,7 +11,6 @@ export class MessageMapper {
       conversationId: row.conversationId,
       authorId: row.authorId,
       content: row.content,
-      offerAmount: row.offerAmount === null ? null : Number(row.offerAmount),
       read: row.read,
       createdAt: row.createdAt,
     });
@@ -23,7 +22,6 @@ export class MessageMapper {
       conversationId: message.conversationId,
       authorId: message.authorId,
       content: message.content,
-      offerAmount: message.offerAmount,
       read: message.read,
       createdAt: message.createdAt,
     };

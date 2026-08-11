@@ -13,9 +13,6 @@ export class MessageResponseDto {
   @ApiProperty()
   content: string;
 
-  @ApiProperty({ required: false, nullable: true })
-  offerAmount: number | null;
-
   @ApiProperty()
   read: boolean;
 

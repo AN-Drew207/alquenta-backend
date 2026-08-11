@@ -20,7 +20,10 @@ export class PropertyResponseDto {
   address: string;
 
   @ApiProperty()
-  city: string;
+  state: string;
+
+  @ApiProperty()
+  municipality: string;
 
   @ApiProperty({ enum: PropertyType })
   type: PropertyType;
@@ -41,10 +44,16 @@ export class PropertyResponseDto {
   bathrooms: number | null;
 
   @ApiProperty({ required: false, nullable: true })
+  parkingSpaces: number | null;
+
+  @ApiProperty({ required: false, nullable: true })
   squareMeters: number | null;
 
   @ApiProperty({ type: [String] })
   images: string[];
+
+  @ApiProperty({ type: [String] })
+  videos: string[];
 
   @ApiProperty()
   createdAt: Date;

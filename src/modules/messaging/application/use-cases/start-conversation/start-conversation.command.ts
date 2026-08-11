@@ -3,6 +3,5 @@ export class StartConversationCommand {
     readonly propertyId: string,
     readonly clientId: string,
     readonly content: string,
-    readonly offerAmount?: number,
   ) {}
 }

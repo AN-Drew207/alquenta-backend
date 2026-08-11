@@ -7,6 +7,7 @@ export class NotificationResponseMapper {
       id: notification.id,
       type: notification.type,
       messageId: notification.messageId,
+      conversationId: notification.conversationId,
       text: notification.text,
       status: notification.status,
       createdAt: notification.createdAt,

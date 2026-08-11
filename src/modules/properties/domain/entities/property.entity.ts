@@ -8,15 +8,18 @@ export interface PropertyChanges {
   title?: string;
   description?: string;
   address?: string;
-  city?: string;
+  state?: string;
+  municipality?: string;
   type?: PropertyType;
   operationType?: OperationType;
   price?: number;
   status?: PropertyStatus;
   bedrooms?: number | null;
   bathrooms?: number | null;
+  parkingSpaces?: number | null;
   squareMeters?: number | null;
   images?: string[];
+  videos?: string[];
 }
 
 export class Property {
@@ -26,15 +29,18 @@ export class Property {
     private _title: string,
     private _description: string,
     private _address: string,
-    private _city: string,
+    private _state: string,
+    private _municipality: string,
     private _type: PropertyType,
     private _operationType: OperationType,
     private _price: number,
     private _status: PropertyStatus,
     private _bedrooms: number | null,
     private _bathrooms: number | null,
+    private _parkingSpaces: number | null,
     private _squareMeters: number | null,
     private _images: string[],
+    private _videos: string[],
     private readonly _createdAt: Date,
   ) {}
 
@@ -43,14 +49,17 @@ export class Property {
     title: string;
     description: string;
     address: string;
-    city: string;
+    state: string;
+    municipality: string;
     type: PropertyType;
     operationType: OperationType;
     price: number;
     bedrooms?: number | null;
     bathrooms?: number | null;
+    parkingSpaces?: number | null;
     squareMeters?: number | null;
     images?: string[];
+    videos?: string[];
   }): Property {
     if (params.price <= 0) {
       throw new InvalidPriceException();
@@ -61,15 +70,18 @@ export class Property {
       params.title,
       params.description,
       params.address,
-      params.city,
+      params.state,
+      params.municipality,
       params.type,
       params.operationType,
       params.price,
       PropertyStatus.AVAILABLE,
       params.bedrooms ?? null,
       params.bathrooms ?? null,
+      params.parkingSpaces ?? null,
       params.squareMeters ?? null,
       params.images ?? [],
+      params.videos ?? [],
       new Date(),
     );
   }
@@ -80,15 +92,18 @@ export class Property {
     title: string;
     description: string;
     address: string;
-    city: string;
+    state: string;
+    municipality: string;
     type: PropertyType;
     operationType: OperationType;
     price: number;
     status: PropertyStatus;
     bedrooms: number | null;
     bathrooms: number | null;
+    parkingSpaces: number | null;
     squareMeters: number | null;
     images: string[];
+    videos: string[];
     createdAt: Date;
   }): Property {
     return new Property(
@@ -97,15 +112,18 @@ export class Property {
       params.title,
       params.description,
       params.address,
-      params.city,
+      params.state,
+      params.municipality,
       params.type,
       params.operationType,
       params.price,
       params.status,
       params.bedrooms,
       params.bathrooms,
+      params.parkingSpaces,
       params.squareMeters,
       params.images,
+      params.videos,
       params.createdAt,
     );
   }
@@ -124,14 +142,17 @@ export class Property {
     if (changes.title !== undefined) this._title = changes.title;
     if (changes.description !== undefined) this._description = changes.description;
     if (changes.address !== undefined) this._address = changes.address;
-    if (changes.city !== undefined) this._city = changes.city;
+    if (changes.state !== undefined) this._state = changes.state;
+    if (changes.municipality !== undefined) this._municipality = changes.municipality;
     if (changes.type !== undefined) this._type = changes.type;
     if (changes.operationType !== undefined) this._operationType = changes.operationType;
     if (changes.status !== undefined) this._status = changes.status;
     if (changes.bedrooms !== undefined) this._bedrooms = changes.bedrooms;
     if (changes.bathrooms !== undefined) this._bathrooms = changes.bathrooms;
+    if (changes.parkingSpaces !== undefined) this._parkingSpaces = changes.parkingSpaces;
     if (changes.squareMeters !== undefined) this._squareMeters = changes.squareMeters;
     if (changes.images !== undefined) this._images = changes.images;
+    if (changes.videos !== undefined) this._videos = changes.videos;
   }
 
   get id(): string {
@@ -154,8 +175,12 @@ export class Property {
     return this._address;
   }
 
-  get city(): string {
-    return this._city;
+  get state(): string {
+    return this._state;
+  }
+
+  get municipality(): string {
+    return this._municipality;
   }
 
   get type(): PropertyType {
@@ -182,12 +207,20 @@ export class Property {
     return this._bathrooms;
   }
 
+  get parkingSpaces(): number | null {
+    return this._parkingSpaces;
+  }
+
   get squareMeters(): number | null {
     return this._squareMeters;
   }
 
   get images(): string[] {
     return this._images;
+  }
+
+  get videos(): string[] {
+    return this._videos;
   }
 
   get createdAt(): Date {

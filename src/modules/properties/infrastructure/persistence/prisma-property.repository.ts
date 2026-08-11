@@ -27,12 +27,27 @@ export class PrismaPropertyRepository implements PropertyRepository {
   }
 
   async findMany(filters: PropertyFilters): Promise<Property[]> {
+    const hasPriceRange =
+      filters.minPrice !== undefined || filters.maxPrice !== undefined;
+
     const rows = await this.prisma.property.findMany({
       where: {
         ...(filters.status && { status: filters.status }),
         ...(filters.type && { type: filters.type }),
-        ...(filters.city && { city: filters.city }),
+        ...(filters.state && { state: filters.state }),
+        ...(filters.municipality && { municipality: filters.municipality }),
         ...(filters.adminId && { adminId: filters.adminId }),
+        ...(hasPriceRange && {
+          price: {
+            ...(filters.minPrice !== undefined && { gte: filters.minPrice }),
+            ...(filters.maxPrice !== undefined && { lte: filters.maxPrice }),
+          },
+        }),
+        ...(filters.bedrooms !== undefined && { bedrooms: { gte: filters.bedrooms } }),
+        ...(filters.bathrooms !== undefined && { bathrooms: { gte: filters.bathrooms } }),
+        ...(filters.parkingSpaces !== undefined && {
+          parkingSpaces: { gte: filters.parkingSpaces },
+        }),
       },
       orderBy: { createdAt: 'desc' },
     });

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { PropertiesModule } from '../properties/properties.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ConversationRepository } from './domain/repositories/conversation.repository';
@@ -12,7 +13,7 @@ import { ListConversationMessagesUseCase } from './application/use-cases/list-co
 import { ConversationsController } from './presentation/http/conversations.controller';
 
 @Module({
-  imports: [PropertiesModule, NotificationsModule],
+  imports: [AuthModule, PropertiesModule, NotificationsModule],
   controllers: [ConversationsController],
   providers: [
     { provide: ConversationRepository, useClass: PrismaConversationRepository },

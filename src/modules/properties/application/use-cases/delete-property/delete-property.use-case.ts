@@ -3,6 +3,8 @@ import { UseCase } from '../../../../../shared/application/use-case.interface';
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { PropertyRepository } from '../../../domain/repositories/property.repository';
 import { PropertyNotOwnedByAdminException } from '../../../domain/exceptions/property-not-owned-by-admin.exception';
+import { PropertyNotCancelledException } from '../../../domain/exceptions/property-not-cancelled.exception';
+import { PropertyStatus } from '../../../domain/enums/property-status.enum';
 import { DeletePropertyCommand } from './delete-property.command';
 
 @Injectable()
@@ -20,6 +22,9 @@ export class DeletePropertyUseCase
     }
     if (!property.belongsTo(command.adminId)) {
       throw new PropertyNotOwnedByAdminException(command.propertyId);
+    }
+    if (property.status !== PropertyStatus.CANCELLED) {
+      throw new PropertyNotCancelledException(command.propertyId);
     }
 
     await this.propertyRepository.delete(command.propertyId);

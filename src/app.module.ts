@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
+import { MediaModule } from './modules/media/media.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MessagingModule } from './modules/messaging/messaging.module';
     PropertiesModule,
     NotificationsModule,
     MessagingModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [

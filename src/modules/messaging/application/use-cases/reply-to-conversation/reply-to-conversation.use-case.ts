@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
 import { UnitOfWork } from '../../../../../shared/domain/transaction/unit-of-work';
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
+import { UserRepository } from '../../../../auth/domain/repositories/user.repository';
 import { NotificationRepository } from '../../../../notifications/domain/repositories/notification.repository';
 import { Notification } from '../../../../notifications/domain/entities/notification.entity';
 import { NotificationType } from '../../../../notifications/domain/enums/notification-type.enum';
@@ -21,6 +22,7 @@ export class ReplyToConversationUseCase
   constructor(
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
+    private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
     private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     private readonly unitOfWork: UnitOfWork,
@@ -38,6 +40,8 @@ export class ReplyToConversationUseCase
     }
 
     const recipientUserId = conversation.otherParticipant(command.authorId);
+    const author = await this.userRepository.findById(command.authorId);
+    const authorName = author?.name ?? 'Alguien';
 
     let notification: Notification;
     let message: Message;
@@ -47,19 +51,15 @@ export class ReplyToConversationUseCase
         conversationId: conversation.id,
         authorId: command.authorId,
         content: command.content,
-        offerAmount: command.offerAmount,
       });
       await this.messageRepository.save(message, ctx);
 
       notification = Notification.create({
         recipientUserId,
-        type: command.offerAmount
-          ? NotificationType.NEW_OFFER
-          : NotificationType.NEW_MESSAGE,
-        text: command.offerAmount
-          ? `New offer of $${command.offerAmount} in your conversation`
-          : 'New reply in your conversation',
+        type: NotificationType.NEW_MESSAGE,
+        text: `${authorName} te respondió en tu conversación`,
         messageId: message.id,
+        conversationId: conversation.id,
       });
       await this.notificationRepository.save(notification, ctx);
     });

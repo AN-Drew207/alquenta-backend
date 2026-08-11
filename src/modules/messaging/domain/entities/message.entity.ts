@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { InvalidOfferAmountException } from '../exceptions/invalid-offer-amount.exception';
 
 export class Message {
   private constructor(
@@ -7,7 +6,6 @@ export class Message {
     private readonly _conversationId: string,
     private readonly _authorId: string,
     private readonly _content: string,
-    private readonly _offerAmount: number | null,
     private _read: boolean,
     private readonly _createdAt: Date,
   ) {}
@@ -16,17 +14,12 @@ export class Message {
     conversationId: string;
     authorId: string;
     content: string;
-    offerAmount?: number | null;
   }): Message {
-    if (params.offerAmount !== undefined && params.offerAmount !== null && params.offerAmount <= 0) {
-      throw new InvalidOfferAmountException();
-    }
     return new Message(
       randomUUID(),
       params.conversationId,
       params.authorId,
       params.content,
-      params.offerAmount ?? null,
       false,
       new Date(),
     );
@@ -37,7 +30,6 @@ export class Message {
     conversationId: string;
     authorId: string;
     content: string;
-    offerAmount: number | null;
     read: boolean;
     createdAt: Date;
   }): Message {
@@ -46,7 +38,6 @@ export class Message {
       params.conversationId,
       params.authorId,
       params.content,
-      params.offerAmount,
       params.read,
       params.createdAt,
     );
@@ -70,10 +61,6 @@ export class Message {
 
   get content(): string {
     return this._content;
-  }
-
-  get offerAmount(): number | null {
-    return this._offerAmount;
   }
 
   get read(): boolean {

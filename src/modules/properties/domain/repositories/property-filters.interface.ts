@@ -4,6 +4,12 @@ import { PropertyStatus } from '../enums/property-status.enum';
 export interface PropertyFilters {
   status?: PropertyStatus;
   type?: PropertyType;
-  city?: string;
+  state?: string;
+  municipality?: string;
   adminId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  parkingSpaces?: number;
 }

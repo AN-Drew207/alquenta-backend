@@ -14,9 +14,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const frontUrl = configService.get<string>('FRONT_URL')?.replace(/\/+$/, '');
+  const allowedOrigins = configService
+    .get<string>('FRONT_URL')
+    ?.split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
   app.enableCors({
-    origin: frontUrl,
+    origin: allowedOrigins,
     credentials: true,
   });
 

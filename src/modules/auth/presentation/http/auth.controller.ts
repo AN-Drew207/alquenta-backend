@@ -33,7 +33,7 @@ export class AuthController {
   ) {}
 
   @ApiOperation({
-    summary: 'Register a new account as ADMIN or CLIENT and set the session cookie',
+    summary: 'Register a new CLIENT account and set the session cookie',
   })
   @Public()
   @Post('register')
@@ -42,13 +42,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<UserResponseDto> {
     const user = await this.registerUseCase.execute(
-      new RegisterCommand(
-        dto.email,
-        dto.password,
-        dto.name,
-        dto.role,
-        dto.phone,
-      ),
+      new RegisterCommand(dto.email, dto.password, dto.name, dto.phone),
     );
     this.setAuthCookie(res, user);
     return UserResponseMapper.toDto(user);

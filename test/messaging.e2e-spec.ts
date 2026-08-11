@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { createTestApp, extractCookie } from './utils/create-test-app';
+import { createTestApp, extractCookie, loginAndExtractCookie, seedAdmin } from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
 describe('Messaging (e2e)', () => {
@@ -21,19 +21,17 @@ describe('Messaging (e2e)', () => {
     app = await createTestApp();
     prisma = app.get(PrismaService);
 
-    const registerAdmin = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email: adminEmail, password, name: 'Msg Admin', role: 'ADMIN' });
-    adminCookie = extractCookie(registerAdmin.headers['set-cookie']);
+    await seedAdmin(prisma, { email: adminEmail, password, name: 'Msg Admin' });
+    adminCookie = await loginAndExtractCookie(app, adminEmail, password);
 
     const registerClient = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: clientEmail, password, name: 'Msg Client', role: 'CLIENT' });
+      .send({ email: clientEmail, password, name: 'Msg Client' });
     clientCookie = extractCookie(registerClient.headers['set-cookie']);
 
     const registerStranger = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: strangerEmail, password, name: 'Stranger', role: 'CLIENT' });
+      .send({ email: strangerEmail, password, name: 'Stranger' });
     strangerCookie = extractCookie(registerStranger.headers['set-cookie']);
 
     const property = await request(app.getHttpServer())

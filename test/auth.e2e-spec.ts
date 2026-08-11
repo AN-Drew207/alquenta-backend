@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { createTestApp } from './utils/create-test-app';
@@ -15,6 +17,18 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     app = await createTestApp();
     prisma = app.get(PrismaService);
+
+    // Admins are onboarded manually (no public registration path), so this
+    // simulates that manual step directly against the database.
+    await prisma.user.create({
+      data: {
+        id: randomUUID(),
+        email: adminEmail,
+        passwordHash: await bcrypt.hash(password, 10),
+        name: 'E2E Admin',
+        role: 'ADMIN',
+      },
+    });
   });
 
   afterAll(async () => {
@@ -24,31 +38,28 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
-  it('registers an ADMIN', () => {
+  it('registers a CLIENT', () => {
     return request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: adminEmail, password, name: 'E2E Admin', role: 'ADMIN' })
+      .send({ email: clientEmail, password, name: 'E2E Client' })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toMatchObject({ email: adminEmail, role: 'ADMIN' });
+        expect(res.body).toMatchObject({ email: clientEmail, role: 'CLIENT' });
         expect(res.body.passwordHash).toBeUndefined();
       });
   });
 
-  it('registers a CLIENT', () => {
+  it('rejects registering with a role in the payload (no public ADMIN sign-up)', () => {
     return request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: clientEmail, password, name: 'E2E Client', role: 'CLIENT' })
-      .expect(201)
-      .expect((res) => {
-        expect(res.body).toMatchObject({ email: clientEmail, role: 'CLIENT' });
-      });
+      .send({ email: 'unused@e2e-auth.test', password, name: 'Nope', role: 'ADMIN' })
+      .expect(400);
   });
 
   it('rejects registering the same email twice', () => {
     return request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: adminEmail, password, name: 'Dup', role: 'ADMIN' })
+      .send({ email: clientEmail, password, name: 'Dup' })
       .expect(409);
   });
 

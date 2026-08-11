@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
 import { User } from '../../../domain/entities/user.entity';
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { PasswordHasher } from '../../../domain/ports/password-hasher';
@@ -24,7 +25,7 @@ export class RegisterUseCase implements UseCase<RegisterCommand, User> {
       email: command.email,
       passwordHash,
       name: command.name,
-      role: command.role,
+      role: Role.CLIENT,
       phone: command.phone,
     });
 

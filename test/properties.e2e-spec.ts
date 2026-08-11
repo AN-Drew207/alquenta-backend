@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { createTestApp, extractCookie } from './utils/create-test-app';
+import { createTestApp, loginAndExtractCookie, seedAdmin } from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
 describe('Properties (e2e)', () => {
@@ -19,15 +19,11 @@ describe('Properties (e2e)', () => {
     app = await createTestApp();
     prisma = app.get(PrismaService);
 
-    const registerA = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email: adminAEmail, password, name: 'Admin A', role: 'ADMIN' });
-    adminACookie = extractCookie(registerA.headers['set-cookie']);
+    await seedAdmin(prisma, { email: adminAEmail, password, name: 'Admin A' });
+    adminACookie = await loginAndExtractCookie(app, adminAEmail, password);
 
-    const registerB = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email: adminBEmail, password, name: 'Admin B', role: 'ADMIN' });
-    adminBCookie = extractCookie(registerB.headers['set-cookie']);
+    await seedAdmin(prisma, { email: adminBEmail, password, name: 'Admin B' });
+    adminBCookie = await loginAndExtractCookie(app, adminBEmail, password);
   });
 
   afterAll(async () => {

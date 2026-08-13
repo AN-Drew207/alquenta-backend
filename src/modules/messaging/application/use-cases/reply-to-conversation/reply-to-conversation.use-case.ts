@@ -50,6 +50,7 @@ export class ReplyToConversationUseCase
       message = Message.create({
         conversationId: conversation.id,
         authorId: command.authorId,
+        authorName,
         content: command.content,
       });
       await this.messageRepository.save(message, ctx);

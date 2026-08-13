@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { PropertyRepository } from './domain/repositories/property.repository';
 import { PrismaPropertyRepository } from './infrastructure/persistence/prisma-property.repository';
 import { PublishPropertyUseCase } from './application/use-cases/publish-property/publish-property.use-case';
@@ -9,6 +10,7 @@ import { GetPropertyByIdUseCase } from './application/use-cases/get-property-by-
 import { PropertiesController } from './presentation/http/properties.controller';
 
 @Module({
+  imports: [AuthModule],
   controllers: [PropertiesController],
   providers: [
     { provide: PropertyRepository, useClass: PrismaPropertyRepository },

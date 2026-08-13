@@ -15,6 +15,7 @@ import { Roles } from '../../../../shared/presentation/decorators/roles.decorato
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import { Role } from '../../../../shared/domain/role.enum';
 import type { AuthenticatedUser } from '../../../../shared/domain/authenticated-user.interface';
+import { UserRepository } from '../../../auth/domain/repositories/user.repository';
 import { PropertyStatus } from '../../domain/enums/property-status.enum';
 import { PublishPropertyUseCase } from '../../application/use-cases/publish-property/publish-property.use-case';
 import { PublishPropertyCommand } from '../../application/use-cases/publish-property/publish-property.command';
@@ -39,6 +40,7 @@ export class PropertiesController {
     private readonly deleteUseCase: DeletePropertyUseCase,
     private readonly listUseCase: ListPropertiesUseCase,
     private readonly getByIdUseCase: GetPropertyByIdUseCase,
+    private readonly userRepository: UserRepository,
   ) {}
 
   @ApiOperation({
@@ -52,6 +54,7 @@ export class PropertiesController {
     const properties = await this.listUseCase.execute({
       status: PropertyStatus.AVAILABLE,
       type: query.type,
+      operationType: query.operationType,
       state: query.state,
       municipality: query.municipality,
       minPrice: query.minPrice,
@@ -60,7 +63,7 @@ export class PropertiesController {
       bathrooms: query.bathrooms,
       parkingSpaces: query.parkingSpaces,
     });
-    return properties.map(PropertyResponseMapper.toDto);
+    return properties.map((property) => PropertyResponseMapper.toDto(property));
   }
 
   @ApiOperation({
@@ -74,7 +77,7 @@ export class PropertiesController {
     const properties = await this.listUseCase.execute({
       adminId: user.id,
     });
-    return properties.map(PropertyResponseMapper.toDto);
+    return properties.map((property) => PropertyResponseMapper.toDto(property));
   }
 
   @ApiOperation({ summary: 'Get a single property by id (no auth required)' })
@@ -82,7 +85,11 @@ export class PropertiesController {
   @Get(':id')
   async getById(@Param('id') id: string): Promise<PropertyResponseDto> {
     const property = await this.getByIdUseCase.execute(id);
-    return PropertyResponseMapper.toDto(property);
+    const admin = await this.userRepository.findById(property.adminId);
+    const contactWhatsapp =
+      property.whatsapp ??
+      (admin?.showPhoneOnListings ? admin.phone : null);
+    return PropertyResponseMapper.toDto(property, contactWhatsapp);
   }
 
   @ApiOperation({ summary: 'Publish a new property listing (ADMIN only)' })
@@ -109,6 +116,7 @@ export class PropertiesController {
         dto.squareMeters,
         dto.images,
         dto.videos,
+        dto.whatsapp,
       ),
     );
     return PropertyResponseMapper.toDto(property);

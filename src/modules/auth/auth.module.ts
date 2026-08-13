@@ -9,6 +9,7 @@ import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { RegisterUseCase } from './application/use-cases/register/register.use-case';
 import { LoginUseCase } from './application/use-cases/login/login.use-case';
+import { UpdateProfileUseCase } from './application/use-cases/update-profile/update-profile.use-case';
 import { AuthController } from './presentation/http/auth.controller';
 
 @Module({
@@ -30,6 +31,7 @@ import { AuthController } from './presentation/http/auth.controller';
     { provide: PasswordHasher, useClass: BcryptPasswordHasher },
     RegisterUseCase,
     LoginUseCase,
+    UpdateProfileUseCase,
     JwtStrategy,
   ],
   exports: [UserRepository],

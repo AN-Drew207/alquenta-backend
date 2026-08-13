@@ -11,7 +11,13 @@ export class ConversationResponseDto {
   clientId: string;
 
   @ApiProperty()
+  clientName: string;
+
+  @ApiProperty()
   adminId: string;
+
+  @ApiProperty()
+  adminName: string;
 
   @ApiProperty()
   createdAt: Date;

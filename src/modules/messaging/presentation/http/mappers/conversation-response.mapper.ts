@@ -7,7 +7,9 @@ export class ConversationResponseMapper {
       id: conversation.id,
       propertyId: conversation.propertyId,
       clientId: conversation.clientId,
+      clientName: conversation.clientName,
       adminId: conversation.adminId,
+      adminName: conversation.adminName,
       createdAt: conversation.createdAt,
     };
   }

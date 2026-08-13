@@ -11,6 +11,9 @@ export class MessageResponseDto {
   authorId: string;
 
   @ApiProperty()
+  authorName: string;
+
+  @ApiProperty()
   content: string;
 
   @ApiProperty()

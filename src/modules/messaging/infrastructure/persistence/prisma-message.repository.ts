@@ -24,6 +24,7 @@ export class PrismaMessageRepository implements MessageRepository {
     const rows = await this.prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
+      include: { author: true },
     });
     return rows.map(MessageMapper.toDomain);
   }

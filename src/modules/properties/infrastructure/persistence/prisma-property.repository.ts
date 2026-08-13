@@ -34,6 +34,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
       where: {
         ...(filters.status && { status: filters.status }),
         ...(filters.type && { type: filters.type }),
+        ...(filters.operationType && { operationType: filters.operationType }),
         ...(filters.state && { state: filters.state }),
         ...(filters.municipality && { municipality: filters.municipality }),
         ...(filters.adminId && { adminId: filters.adminId }),

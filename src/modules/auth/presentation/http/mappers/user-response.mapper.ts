@@ -9,6 +9,7 @@ export class UserResponseMapper {
       name: user.name,
       role: user.role,
       phone: user.phone,
+      showPhoneOnListings: user.showPhoneOnListings,
     };
   }
 }

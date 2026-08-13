@@ -25,12 +25,16 @@ export class PrismaConversationRepository implements ConversationRepository {
       },
       create: data,
       update: {},
+      include: { client: true, admin: true },
     });
     return ConversationMapper.toDomain(row);
   }
 
   async findById(id: string): Promise<Conversation | null> {
-    const row = await this.prisma.conversation.findUnique({ where: { id } });
+    const row = await this.prisma.conversation.findUnique({
+      where: { id },
+      include: { client: true, admin: true },
+    });
     return row ? ConversationMapper.toDomain(row) : null;
   }
 
@@ -38,6 +42,7 @@ export class PrismaConversationRepository implements ConversationRepository {
     const rows = await this.prisma.conversation.findMany({
       where: { OR: [{ clientId: userId }, { adminId: userId }] },
       orderBy: { createdAt: 'desc' },
+      include: { client: true, admin: true },
     });
     return rows.map(ConversationMapper.toDomain);
   }

@@ -55,6 +55,17 @@ export class PropertyResponseDto {
   @ApiProperty({ type: [String] })
   videos: string[];
 
+  @ApiProperty({ required: false, nullable: true })
+  whatsapp: string | null;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description:
+      'Effective WhatsApp number to contact about this listing (this property\'s own number, or the owner\'s profile number if they opted to show it)',
+  })
+  contactWhatsapp: string | null;
+
   @ApiProperty()
   createdAt: Date;
 }

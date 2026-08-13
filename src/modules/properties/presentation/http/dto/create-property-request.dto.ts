@@ -83,4 +83,12 @@ export class CreatePropertyRequestDto {
   @ArrayMaxSize(MAX_VIDEOS)
   @IsString({ each: true })
   videos?: string[];
+
+  @ApiProperty({
+    required: false,
+    description: 'WhatsApp number for this listing specifically (overrides the profile default)',
+  })
+  @IsOptional()
+  @IsString()
+  whatsapp?: string;
 }

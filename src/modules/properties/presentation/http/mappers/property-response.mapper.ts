@@ -2,7 +2,10 @@ import { Property } from '../../../domain/entities/property.entity';
 import { PropertyResponseDto } from '../dto/property-response.dto';
 
 export class PropertyResponseMapper {
-  static toDto(property: Property): PropertyResponseDto {
+  static toDto(
+    property: Property,
+    contactWhatsapp?: string | null,
+  ): PropertyResponseDto {
     return {
       id: property.id,
       adminId: property.adminId,
@@ -21,6 +24,9 @@ export class PropertyResponseMapper {
       squareMeters: property.squareMeters,
       images: property.images,
       videos: property.videos,
+      whatsapp: property.whatsapp,
+      contactWhatsapp:
+        contactWhatsapp !== undefined ? contactWhatsapp : property.whatsapp,
       createdAt: property.createdAt,
     };
   }

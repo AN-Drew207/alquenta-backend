@@ -27,6 +27,7 @@ export class PropertyMapper {
       squareMeters: row.squareMeters === null ? null : Number(row.squareMeters),
       images: row.images,
       videos: row.videos,
+      whatsapp: row.whatsapp,
       createdAt: row.createdAt,
     });
   }
@@ -50,6 +51,7 @@ export class PropertyMapper {
       squareMeters: property.squareMeters,
       images: property.images,
       videos: property.videos,
+      whatsapp: property.whatsapp,
       createdAt: property.createdAt,
     };
   }

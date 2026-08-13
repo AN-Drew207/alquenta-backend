@@ -8,7 +8,8 @@ export class User {
     private readonly _passwordHash: string,
     private readonly _name: string,
     private readonly _role: Role,
-    private readonly _phone: string | null,
+    private _phone: string | null,
+    private _showPhoneOnListings: boolean,
   ) {}
 
   static create(params: {
@@ -25,6 +26,7 @@ export class User {
       params.name,
       params.role,
       params.phone ?? null,
+      false,
     );
   }
 
@@ -35,6 +37,7 @@ export class User {
     name: string;
     role: Role;
     phone: string | null;
+    showPhoneOnListings: boolean;
   }): User {
     return new User(
       params.id,
@@ -43,7 +46,18 @@ export class User {
       params.name,
       params.role,
       params.phone,
+      params.showPhoneOnListings,
     );
+  }
+
+  updateProfile(changes: {
+    phone?: string | null;
+    showPhoneOnListings?: boolean;
+  }): void {
+    if (changes.phone !== undefined) this._phone = changes.phone;
+    if (changes.showPhoneOnListings !== undefined) {
+      this._showPhoneOnListings = changes.showPhoneOnListings;
+    }
   }
 
   get id(): string {
@@ -68,5 +82,9 @@ export class User {
 
   get phone(): string | null {
     return this._phone;
+  }
+
+  get showPhoneOnListings(): boolean {
+    return this._showPhoneOnListings;
   }
 }

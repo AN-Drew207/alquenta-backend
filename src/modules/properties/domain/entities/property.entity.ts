@@ -20,6 +20,7 @@ export interface PropertyChanges {
   squareMeters?: number | null;
   images?: string[];
   videos?: string[];
+  whatsapp?: string | null;
 }
 
 export class Property {
@@ -41,6 +42,7 @@ export class Property {
     private _squareMeters: number | null,
     private _images: string[],
     private _videos: string[],
+    private _whatsapp: string | null,
     private readonly _createdAt: Date,
   ) {}
 
@@ -60,6 +62,7 @@ export class Property {
     squareMeters?: number | null;
     images?: string[];
     videos?: string[];
+    whatsapp?: string | null;
   }): Property {
     if (params.price <= 0) {
       throw new InvalidPriceException();
@@ -82,6 +85,7 @@ export class Property {
       params.squareMeters ?? null,
       params.images ?? [],
       params.videos ?? [],
+      params.whatsapp ?? null,
       new Date(),
     );
   }
@@ -104,6 +108,7 @@ export class Property {
     squareMeters: number | null;
     images: string[];
     videos: string[];
+    whatsapp: string | null;
     createdAt: Date;
   }): Property {
     return new Property(
@@ -124,6 +129,7 @@ export class Property {
       params.squareMeters,
       params.images,
       params.videos,
+      params.whatsapp,
       params.createdAt,
     );
   }
@@ -153,6 +159,7 @@ export class Property {
     if (changes.squareMeters !== undefined) this._squareMeters = changes.squareMeters;
     if (changes.images !== undefined) this._images = changes.images;
     if (changes.videos !== undefined) this._videos = changes.videos;
+    if (changes.whatsapp !== undefined) this._whatsapp = changes.whatsapp;
   }
 
   get id(): string {
@@ -221,6 +228,10 @@ export class Property {
 
   get videos(): string[] {
     return this._videos;
+  }
+
+  get whatsapp(): string | null {
+    return this._whatsapp;
   }
 
   get createdAt(): Date {

@@ -16,4 +16,7 @@ export class UserResponseDto {
 
   @ApiProperty({ required: false, nullable: true })
   phone: string | null;
+
+  @ApiProperty()
+  showPhoneOnListings: boolean;
 }

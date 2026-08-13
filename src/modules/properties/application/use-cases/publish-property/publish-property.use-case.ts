@@ -27,6 +27,7 @@ export class PublishPropertyUseCase
       squareMeters: command.squareMeters,
       images: command.images,
       videos: command.videos,
+      whatsapp: command.whatsapp,
     });
 
     await this.propertyRepository.save(property);

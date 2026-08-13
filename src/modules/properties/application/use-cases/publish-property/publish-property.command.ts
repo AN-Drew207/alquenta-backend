@@ -18,5 +18,6 @@ export class PublishPropertyCommand {
     readonly squareMeters?: number,
     readonly images?: string[],
     readonly videos?: string[],
+    readonly whatsapp?: string,
   ) {}
 }

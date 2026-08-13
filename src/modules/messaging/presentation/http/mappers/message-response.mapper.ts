@@ -7,6 +7,7 @@ export class MessageResponseMapper {
       id: message.id,
       conversationId: message.conversationId,
       authorId: message.authorId,
+      authorName: message.authorName,
       content: message.content,
       read: message.read,
       createdAt: message.createdAt,

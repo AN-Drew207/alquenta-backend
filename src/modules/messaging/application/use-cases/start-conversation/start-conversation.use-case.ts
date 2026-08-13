@@ -72,6 +72,7 @@ export class StartConversationUseCase
       message = Message.create({
         conversationId: conversation.id,
         authorId: command.clientId,
+        authorName: clientName,
         content: command.content,
       });
       await this.messageRepository.save(message, ctx);

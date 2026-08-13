@@ -11,6 +11,7 @@ export class UserMapper {
       name: row.name,
       role: row.role as Role,
       phone: row.phone,
+      showPhoneOnListings: row.showPhoneOnListings,
     });
   }
 
@@ -22,6 +23,7 @@ export class UserMapper {
       name: user.name,
       role: user.role,
       phone: user.phone,
+      showPhoneOnListings: user.showPhoneOnListings,
     };
   }
 }

@@ -1,15 +1,17 @@
 import {
   Prisma,
   Message as PrismaMessage,
+  User as PrismaUser,
 } from '../../../../../generated/prisma/client';
 import { Message } from '../../domain/entities/message.entity';
 
 export class MessageMapper {
-  static toDomain(row: PrismaMessage): Message {
+  static toDomain(row: PrismaMessage & { author: PrismaUser }): Message {
     return Message.reconstitute({
       id: row.id,
       conversationId: row.conversationId,
       authorId: row.authorId,
+      authorName: row.author.name,
       content: row.content,
       read: row.read,
       createdAt: row.createdAt,

@@ -5,6 +5,7 @@ export class Message {
     private readonly _id: string,
     private readonly _conversationId: string,
     private readonly _authorId: string,
+    private readonly _authorName: string,
     private readonly _content: string,
     private _read: boolean,
     private readonly _createdAt: Date,
@@ -13,12 +14,14 @@ export class Message {
   static create(params: {
     conversationId: string;
     authorId: string;
+    authorName: string;
     content: string;
   }): Message {
     return new Message(
       randomUUID(),
       params.conversationId,
       params.authorId,
+      params.authorName,
       params.content,
       false,
       new Date(),
@@ -29,6 +32,7 @@ export class Message {
     id: string;
     conversationId: string;
     authorId: string;
+    authorName: string;
     content: string;
     read: boolean;
     createdAt: Date;
@@ -37,6 +41,7 @@ export class Message {
       params.id,
       params.conversationId,
       params.authorId,
+      params.authorName,
       params.content,
       params.read,
       params.createdAt,
@@ -57,6 +62,10 @@ export class Message {
 
   get authorId(): string {
     return this._authorId;
+  }
+
+  get authorName(): string {
+    return this._authorName;
   }
 
   get content(): string {

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -11,10 +19,13 @@ import { RegisterUseCase } from '../../application/use-cases/register/register.u
 import { RegisterCommand } from '../../application/use-cases/register/register.command';
 import { LoginUseCase } from '../../application/use-cases/login/login.use-case';
 import { LoginCommand } from '../../application/use-cases/login/login.command';
+import { UpdateProfileUseCase } from '../../application/use-cases/update-profile/update-profile.use-case';
+import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
 import { User } from '../../domain/entities/user.entity';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
+import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
 
@@ -27,6 +38,7 @@ export class AuthController {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly userRepository: UserRepository,
@@ -78,6 +90,22 @@ export class AuthController {
     if (!user) {
       throw new EntityNotFoundException('User', authenticatedUser.id);
     }
+    return UserResponseMapper.toDto(user);
+  }
+
+  @ApiOperation({ summary: "Update the authenticated user's profile" })
+  @Patch('me')
+  async updateMe(
+    @Body() dto: UpdateProfileRequestDto,
+    @CurrentUser() authenticatedUser: AuthenticatedUser,
+  ): Promise<UserResponseDto> {
+    const user = await this.updateProfileUseCase.execute(
+      new UpdateProfileCommand(
+        authenticatedUser.id,
+        dto.phone,
+        dto.showPhoneOnListings,
+      ),
+    );
     return UserResponseMapper.toDto(user);
   }
 

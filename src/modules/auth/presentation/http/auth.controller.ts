@@ -79,7 +79,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(200)
   logout(@Res({ passthrough: true }) res: Response): { ok: true } {
-    res.clearCookie(COOKIE_NAME);
+    res.clearCookie(COOKIE_NAME, this.cookieOptions());
     return { ok: true };
   }
 
@@ -115,12 +115,22 @@ export class AuthController {
       email: user.email,
       role: user.role,
     });
-    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
     res.cookie(COOKIE_NAME, token, {
+      ...this.cookieOptions(),
+      maxAge: COOKIE_MAX_AGE_MS,
+    });
+  }
+
+  private cookieOptions(): {
+    httpOnly: true;
+    secure: boolean;
+    sameSite: 'none' | 'lax';
+  } {
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    return {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? 'none' : 'lax',
-      maxAge: COOKIE_MAX_AGE_MS,
-    });
+    };
   }
 }

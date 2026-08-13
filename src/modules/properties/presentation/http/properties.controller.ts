@@ -55,6 +55,7 @@ export class PropertiesController {
       status: PropertyStatus.AVAILABLE,
       type: query.type,
       operationType: query.operationType,
+      adminId: query.adminId,
       state: query.state,
       municipality: query.municipality,
       minPrice: query.minPrice,

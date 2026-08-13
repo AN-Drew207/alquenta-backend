@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Patch,
   Post,
   Res,
@@ -27,6 +28,7 @@ import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { PublicProfileResponseDto } from './dto/public-profile-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
 
 const COOKIE_NAME = 'access_token';
@@ -107,6 +109,21 @@ export class AuthController {
       ),
     );
     return UserResponseMapper.toDto(user);
+  }
+
+  @ApiOperation({
+    summary: "Get a user's public profile (no auth required)",
+  })
+  @Public()
+  @Get(':id')
+  async getPublicProfile(
+    @Param('id') id: string,
+  ): Promise<PublicProfileResponseDto> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new EntityNotFoundException('User', id);
+    }
+    return UserResponseMapper.toPublicDto(user);
   }
 
   private setAuthCookie(res: Response, user: User): void {

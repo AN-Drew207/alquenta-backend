@@ -18,6 +18,11 @@ export class ListPropertiesQueryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  adminId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   state?: string;
 
   @ApiProperty({ required: false })

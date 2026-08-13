@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
 import { UserRepository } from '../../../../auth/domain/repositories/user.repository';
 import { Notification } from '../../../domain/entities/notification.entity';
-import { EmailSender } from '../../../domain/ports/email-sender';
+import { EmailSender } from '../../../../../shared/domain/ports/email-sender';
 
 @Injectable()
 export class SendNotificationEmailUseCase

@@ -21,4 +21,7 @@ export class MediaSignatureResponseDto {
 
   @ApiProperty({ enum: ['image', 'video'] })
   resourceType: 'image' | 'video';
+
+  @ApiProperty({ required: false })
+  transformation?: string;
 }

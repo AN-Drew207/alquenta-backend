@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationRepository } from './domain/repositories/notification.repository';
-import { EmailSender } from './domain/ports/email-sender';
 import { PrismaNotificationRepository } from './infrastructure/persistence/prisma-notification.repository';
-import { ResendEmailSender } from './infrastructure/email/resend-email-sender';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification/create-notification.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email/send-notification-email.use-case';
 import { ListMyNotificationsUseCase } from './application/use-cases/list-my-notifications/list-my-notifications.use-case';
@@ -15,7 +13,6 @@ import { NotificationsController } from './presentation/http/notifications.contr
   controllers: [NotificationsController],
   providers: [
     { provide: NotificationRepository, useClass: PrismaNotificationRepository },
-    { provide: EmailSender, useClass: ResendEmailSender },
     CreateNotificationUseCase,
     SendNotificationEmailUseCase,
     ListMyNotificationsUseCase,

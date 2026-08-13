@@ -44,14 +44,38 @@ enum NotificationStatus {
   READ
 }
 
+enum AccountType {
+  OWNER
+  AGENCY
+  CLIENT
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
+  pendingEmail String?
+  emailVerified Boolean @default(true)
   passwordHash String
   name         String
+  username     String?  @unique
   role         Role
+  accountType  AccountType @default(CLIENT)
+  avatarUrl    String?
+  bio          String?
+  city         String?
+  state        String?
+  website      String?
   phone        String?
+  altPhone     String?
+  phoneVerified Boolean @default(false)
   showPhoneOnListings Boolean  @default(false)
+  allowCalls   Boolean  @default(false)
+  showEmail    Boolean  @default(false)
+  notificationPrefs Json?
+  privacyPrefs      Json?
+  generalPrefs      Json?
+  twoFactorEnabled  Boolean @default(false)
+  deactivatedAt     DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -60,12 +84,25 @@ model User {
   conversationsAsAdmin     Conversation[] @relation("AdminConversations")
   messages                 Message[]      @relation("MessageAuthor")
   notifications            Notification[]
+  sessions                 Session[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent    String?
+  ip           String?
+  createdAt    DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Property {
   id            String         @id @default(uuid())
   adminId       String
-  admin         User           @relation("AdminProperties", fields: [adminId], references: [id])
+  admin         User           @relation("AdminProperties", fields: [adminId], references: [id], onDelete: Cascade)
   title         String
   description   String
   address       String
@@ -93,11 +130,11 @@ model Property {
 model Conversation {
   id         String   @id @default(uuid())
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   clientId   String
-  client     User     @relation("ClientConversations", fields: [clientId], references: [id])
+  client     User     @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
   adminId    String
-  admin      User     @relation("AdminConversations", fields: [adminId], references: [id])
+  admin      User     @relation("AdminConversations", fields: [adminId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 
   messages Message[]
@@ -108,9 +145,9 @@ model Conversation {
 model Message {
   id             String       @id @default(uuid())
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   authorId       String
-  author         User         @relation("MessageAuthor", fields: [authorId], references: [id])
+  author         User         @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   content        String
   read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
@@ -124,10 +161,10 @@ model Message {
 model Notification {
   id              String             @id @default(uuid())
   recipientUserId String
-  recipient       User               @relation(fields: [recipientUserId], references: [id])
+  recipient       User               @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
   type            NotificationType
   messageId       String?
-  message         Message?           @relation(fields: [messageId], references: [id])
+  message         Message?           @relation(fields: [messageId], references: [id], onDelete: Cascade)
   conversationId  String?
   text            String
   status          NotificationStatus @default(PENDING)

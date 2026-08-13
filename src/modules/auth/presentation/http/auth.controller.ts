@@ -6,12 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../../shared/domain/authenticated-user.interface';
@@ -24,15 +25,15 @@ import { UpdateProfileUseCase } from '../../application/use-cases/update-profile
 import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
 import { User } from '../../domain/entities/user.entity';
 import { UserRepository } from '../../domain/repositories/user.repository';
+import { Session } from '../../domain/entities/session.entity';
+import { SessionRepository } from '../../domain/repositories/session.repository';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PublicProfileResponseDto } from './dto/public-profile-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
-
-const COOKIE_NAME = 'access_token';
-const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+import { COOKIE_MAX_AGE_MS, COOKIE_NAME, cookieOptions } from './auth-cookie';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -44,6 +45,7 @@ export class AuthController {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly userRepository: UserRepository,
+    private readonly sessionRepository: SessionRepository,
   ) {}
 
   @ApiOperation({
@@ -53,12 +55,13 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() dto: RegisterRequestDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<UserResponseDto> {
     const user = await this.registerUseCase.execute(
       new RegisterCommand(dto.email, dto.password, dto.name, dto.phone),
     );
-    this.setAuthCookie(res, user);
+    await this.createSessionAndSetCookie(req, res, user);
     return UserResponseMapper.toDto(user);
   }
 
@@ -68,20 +71,25 @@ export class AuthController {
   @HttpCode(200)
   async login(
     @Body() dto: LoginRequestDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<UserResponseDto> {
     const user = await this.loginUseCase.execute(
       new LoginCommand(dto.email, dto.password),
     );
-    this.setAuthCookie(res, user);
+    await this.createSessionAndSetCookie(req, res, user);
     return UserResponseMapper.toDto(user);
   }
 
-  @ApiOperation({ summary: 'Log out by clearing the session cookie' })
+  @ApiOperation({ summary: 'Log out by clearing the session cookie and revoking the session' })
   @Post('logout')
   @HttpCode(200)
-  logout(@Res({ passthrough: true }) res: Response): { ok: true } {
-    res.clearCookie(COOKIE_NAME, this.cookieOptions());
+  async logout(
+    @CurrentUser() authenticatedUser: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ ok: true }> {
+    await this.sessionRepository.delete(authenticatedUser.sessionId);
+    res.clearCookie(COOKIE_NAME, cookieOptions(this.configService));
     return { ok: true };
   }
 
@@ -102,11 +110,10 @@ export class AuthController {
     @CurrentUser() authenticatedUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
     const user = await this.updateProfileUseCase.execute(
-      new UpdateProfileCommand(
-        authenticatedUser.id,
-        dto.phone,
-        dto.showPhoneOnListings,
-      ),
+      new UpdateProfileCommand(authenticatedUser.id, {
+        phone: dto.phone,
+        showPhoneOnListings: dto.showPhoneOnListings,
+      }),
     );
     return UserResponseMapper.toDto(user);
   }
@@ -126,28 +133,27 @@ export class AuthController {
     return UserResponseMapper.toPublicDto(user);
   }
 
-  private setAuthCookie(res: Response, user: User): void {
+  private async createSessionAndSetCookie(
+    req: Request,
+    res: Response,
+    user: User,
+  ): Promise<void> {
+    const session = Session.create({
+      userId: user.id,
+      userAgent: req.headers['user-agent'] ?? null,
+      ip: req.ip ?? null,
+    });
+    await this.sessionRepository.save(session);
+
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
       role: user.role,
+      sid: session.id,
     });
     res.cookie(COOKIE_NAME, token, {
-      ...this.cookieOptions(),
+      ...cookieOptions(this.configService),
       maxAge: COOKIE_MAX_AGE_MS,
     });
-  }
-
-  private cookieOptions(): {
-    httpOnly: true;
-    secure: boolean;
-    sameSite: 'none' | 'lax';
-  } {
-    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
-    return {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-    };
   }
 }

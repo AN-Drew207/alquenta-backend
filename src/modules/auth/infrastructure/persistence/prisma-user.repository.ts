@@ -29,4 +29,13 @@ export class PrismaUserRepository implements UserRepository {
     const row = await this.prisma.user.findUnique({ where: { id } });
     return row ? UserMapper.toDomain(row) : null;
   }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const row = await this.prisma.user.findUnique({ where: { username } });
+    return row ? UserMapper.toDomain(row) : null;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.delete({ where: { id } });
+  }
 }

@@ -4,4 +4,5 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   role: Role;
+  sessionId: string;
 }

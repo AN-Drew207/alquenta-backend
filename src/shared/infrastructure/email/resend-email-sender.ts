@@ -19,6 +19,7 @@ export class ResendEmailSender implements EmailSender {
       to: message.to,
       subject: message.subject,
       html: message.html,
+      attachments: message.attachments,
     });
 
     if (error) {

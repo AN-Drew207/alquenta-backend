@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../../../generated/prisma/client';
 import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
 import { TransactionContext } from '../../../../shared/domain/transaction/transaction-context';
+import { Role } from '../../../../shared/domain/role.enum';
 import { User } from '../../domain/entities/user.entity';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { UserMapper } from './user.mapper';
@@ -33,6 +34,14 @@ export class PrismaUserRepository implements UserRepository {
   async findByUsername(username: string): Promise<User | null> {
     const row = await this.prisma.user.findUnique({ where: { username } });
     return row ? UserMapper.toDomain(row) : null;
+  }
+
+  async findManyByRole(role: Role): Promise<User[]> {
+    const rows = await this.prisma.user.findMany({
+      where: { role },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(UserMapper.toDomain);
   }
 
   async delete(id: string): Promise<void> {

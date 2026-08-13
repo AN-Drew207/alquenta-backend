@@ -2,6 +2,7 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserResponseDto } from '../dto/user-response.dto';
 import { PublicProfileResponseDto } from '../dto/public-profile-response.dto';
 import { ProfileResponseDto } from '../dto/profile-response.dto';
+import { AdminSummaryResponseDto } from '../dto/admin-summary-response.dto';
 
 export class UserResponseMapper {
   static toDto(user: User): UserResponseDto {
@@ -50,6 +51,17 @@ export class UserResponseMapper {
       twoFactorEnabled: user.twoFactorEnabled,
       deactivatedAt: user.deactivatedAt,
       completeness: user.completeness,
+    };
+  }
+
+  static toAdminSummaryDto(user: User): AdminSummaryResponseDto {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      createdAt: user.createdAt,
+      deactivatedAt: user.deactivatedAt,
     };
   }
 }

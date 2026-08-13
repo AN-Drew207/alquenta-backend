@@ -6,5 +6,6 @@ export abstract class PropertyRepository {
   abstract save(property: Property, ctx?: TransactionContext): Promise<void>;
   abstract findById(id: string): Promise<Property | null>;
   abstract findMany(filters: PropertyFilters): Promise<Property[]>;
+  abstract countByAdminId(adminId: string): Promise<number>;
   abstract delete(id: string): Promise<void>;
 }

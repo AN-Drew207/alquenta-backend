@@ -57,6 +57,7 @@ export class User {
     private _generalPrefs: GeneralPrefs,
     private _twoFactorEnabled: boolean,
     private _deactivatedAt: Date | null,
+    private readonly _createdAt: Date,
   ) {}
 
   static create(params: {
@@ -92,6 +93,7 @@ export class User {
       DEFAULT_GENERAL_PREFS,
       false,
       null,
+      new Date(),
     );
   }
 
@@ -121,6 +123,7 @@ export class User {
     generalPrefs: GeneralPrefs | null;
     twoFactorEnabled: boolean;
     deactivatedAt: Date | null;
+    createdAt: Date;
   }): User {
     return new User(
       params.id,
@@ -148,6 +151,7 @@ export class User {
       params.generalPrefs ?? DEFAULT_GENERAL_PREFS,
       params.twoFactorEnabled,
       params.deactivatedAt,
+      params.createdAt,
     );
   }
 
@@ -306,6 +310,10 @@ export class User {
 
   get deactivatedAt(): Date | null {
     return this._deactivatedAt;
+  }
+
+  get createdAt(): Date {
+    return this._createdAt;
   }
 
   /** Weighted profile completeness, 0-100. */

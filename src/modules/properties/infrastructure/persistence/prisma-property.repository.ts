@@ -55,6 +55,10 @@ export class PrismaPropertyRepository implements PropertyRepository {
     return rows.map(PropertyMapper.toDomain);
   }
 
+  async countByAdminId(adminId: string): Promise<number> {
+    return this.prisma.property.count({ where: { adminId } });
+  }
+
   async delete(id: string): Promise<void> {
     await this.prisma.property.delete({ where: { id } });
   }

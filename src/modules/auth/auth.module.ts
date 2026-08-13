@@ -16,9 +16,16 @@ import { ChangePasswordUseCase } from './application/use-cases/change-password/c
 import { RequestEmailChangeUseCase } from './application/use-cases/request-email-change/request-email-change.use-case';
 import { ConfirmEmailChangeUseCase } from './application/use-cases/confirm-email-change/confirm-email-change.use-case';
 import { ExportAccountDataUseCase } from './application/use-cases/export-account-data/export-account-data.use-case';
+import { InviteAdminUseCase } from './application/use-cases/invite-admin/invite-admin.use-case';
+import { AcceptAdminInvitationUseCase } from './application/use-cases/accept-admin-invitation/accept-admin-invitation.use-case';
+import { ListAdminsUseCase } from './application/use-cases/list-admins/list-admins.use-case';
+import { DisableAdminUseCase } from './application/use-cases/disable-admin/disable-admin.use-case';
+import { EnableAdminUseCase } from './application/use-cases/enable-admin/enable-admin.use-case';
+import { DeleteAdminUseCase } from './application/use-cases/delete-admin/delete-admin.use-case';
 import { AuthController } from './presentation/http/auth.controller';
 import { ProfileController } from './presentation/http/profile.controller';
 import { AccountController } from './presentation/http/account.controller';
+import { SuperadminController } from './presentation/http/superadmin.controller';
 
 @Module({
   imports: [
@@ -33,7 +40,12 @@ import { AccountController } from './presentation/http/account.controller';
       }),
     }),
   ],
-  controllers: [AuthController, ProfileController, AccountController],
+  controllers: [
+    AuthController,
+    ProfileController,
+    AccountController,
+    SuperadminController,
+  ],
   providers: [
     { provide: UserRepository, useClass: PrismaUserRepository },
     { provide: SessionRepository, useClass: PrismaSessionRepository },
@@ -45,6 +57,12 @@ import { AccountController } from './presentation/http/account.controller';
     RequestEmailChangeUseCase,
     ConfirmEmailChangeUseCase,
     ExportAccountDataUseCase,
+    InviteAdminUseCase,
+    AcceptAdminInvitationUseCase,
+    ListAdminsUseCase,
+    DisableAdminUseCase,
+    EnableAdminUseCase,
+    DeleteAdminUseCase,
     JwtStrategy,
   ],
   exports: [UserRepository],

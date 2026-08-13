@@ -23,6 +23,8 @@ import { LoginUseCase } from '../../application/use-cases/login/login.use-case';
 import { LoginCommand } from '../../application/use-cases/login/login.command';
 import { UpdateProfileUseCase } from '../../application/use-cases/update-profile/update-profile.use-case';
 import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
+import { AcceptAdminInvitationUseCase } from '../../application/use-cases/accept-admin-invitation/accept-admin-invitation.use-case';
+import { AcceptAdminInvitationCommand } from '../../application/use-cases/accept-admin-invitation/accept-admin-invitation.command';
 import { User } from '../../domain/entities/user.entity';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { Session } from '../../domain/entities/session.entity';
@@ -30,6 +32,7 @@ import { SessionRepository } from '../../domain/repositories/session.repository'
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
+import { AcceptAdminInvitationRequestDto } from './dto/accept-admin-invitation-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PublicProfileResponseDto } from './dto/public-profile-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
@@ -42,6 +45,7 @@ export class AuthController {
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
+    private readonly acceptAdminInvitationUseCase: AcceptAdminInvitationUseCase,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly userRepository: UserRepository,
@@ -115,6 +119,24 @@ export class AuthController {
         showPhoneOnListings: dto.showPhoneOnListings,
       }),
     );
+    return UserResponseMapper.toDto(user);
+  }
+
+  @ApiOperation({
+    summary:
+      'Accept an admin invitation link, create the ADMIN account and sign in',
+  })
+  @Public()
+  @Post('admin-invite/accept')
+  async acceptAdminInvitation(
+    @Body() dto: AcceptAdminInvitationRequestDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<UserResponseDto> {
+    const user = await this.acceptAdminInvitationUseCase.execute(
+      new AcceptAdminInvitationCommand(dto.token, dto.name, dto.password),
+    );
+    await this.createSessionAndSetCookie(req, res, user);
     return UserResponseMapper.toDto(user);
   }
 

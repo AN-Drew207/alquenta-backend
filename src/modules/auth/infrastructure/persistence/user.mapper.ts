@@ -36,6 +36,7 @@ export class UserMapper {
       generalPrefs: row.generalPrefs as unknown as GeneralPrefs | null,
       twoFactorEnabled: row.twoFactorEnabled,
       deactivatedAt: row.deactivatedAt,
+      createdAt: row.createdAt,
     });
   }
 
@@ -66,6 +67,7 @@ export class UserMapper {
       generalPrefs: user.generalPrefs as unknown as Prisma.InputJsonValue,
       twoFactorEnabled: user.twoFactorEnabled,
       deactivatedAt: user.deactivatedAt,
+      createdAt: user.createdAt,
     };
   }
 }

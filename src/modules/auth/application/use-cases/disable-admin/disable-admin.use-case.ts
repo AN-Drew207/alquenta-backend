@@ -1,0 +1,26 @@
+import { Injectable } from '@nestjs/common';
+import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
+import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
+import { UserRepository } from '../../../domain/repositories/user.repository';
+import { SessionRepository } from '../../../domain/repositories/session.repository';
+import { DisableAdminCommand } from './disable-admin.command';
+
+@Injectable()
+export class DisableAdminUseCase implements UseCase<DisableAdminCommand, void> {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly sessionRepository: SessionRepository,
+  ) {}
+
+  async execute(command: DisableAdminCommand): Promise<void> {
+    const admin = await this.userRepository.findById(command.adminId);
+    if (!admin || admin.role !== Role.ADMIN) {
+      throw new EntityNotFoundException('Admin', command.adminId);
+    }
+
+    admin.deactivate();
+    await this.userRepository.save(admin);
+    await this.sessionRepository.deleteAllForUser(command.adminId);
+  }
+}

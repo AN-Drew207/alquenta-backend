@@ -25,6 +25,8 @@ import { DeletePropertyUseCase } from '../../application/use-cases/delete-proper
 import { DeletePropertyCommand } from '../../application/use-cases/delete-property/delete-property.command';
 import { ListPropertiesUseCase } from '../../application/use-cases/list-properties/list-properties.use-case';
 import { GetPropertyByIdUseCase } from '../../application/use-cases/get-property-by-id/get-property-by-id.use-case';
+import { CancelPropertyUseCase } from '../../application/use-cases/cancel-property/cancel-property.use-case';
+import { CancelPropertyCommand } from '../../application/use-cases/cancel-property/cancel-property.command';
 import { CreatePropertyRequestDto } from './dto/create-property-request.dto';
 import { UpdatePropertyRequestDto } from './dto/update-property-request.dto';
 import { ListPropertiesQueryDto } from './dto/list-properties-query.dto';
@@ -40,6 +42,7 @@ export class PropertiesController {
     private readonly deleteUseCase: DeletePropertyUseCase,
     private readonly listUseCase: ListPropertiesUseCase,
     private readonly getByIdUseCase: GetPropertyByIdUseCase,
+    private readonly cancelPropertyUseCase: CancelPropertyUseCase,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -78,6 +81,18 @@ export class PropertiesController {
     const properties = await this.listUseCase.execute({
       adminId: user.id,
     });
+    return properties.map((property) => PropertyResponseMapper.toDto(property));
+  }
+
+  @ApiOperation({
+    summary: "List an admin's properties in any status (SUPERADMIN oversight)",
+  })
+  @Roles(Role.SUPERADMIN)
+  @Get('admin/:adminId')
+  async listByAdmin(
+    @Param('adminId') adminId: string,
+  ): Promise<PropertyResponseDto[]> {
+    const properties = await this.listUseCase.execute({ adminId });
     return properties.map((property) => PropertyResponseMapper.toDto(property));
   }
 
@@ -150,5 +165,17 @@ export class PropertiesController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
     await this.deleteUseCase.execute(new DeletePropertyCommand(id, user.id));
+  }
+
+  @ApiOperation({
+    summary: 'Cancel any admin\'s listing regardless of ownership (SUPERADMIN oversight)',
+  })
+  @Roles(Role.SUPERADMIN)
+  @Patch(':id/cancel')
+  async cancel(@Param('id') id: string): Promise<PropertyResponseDto> {
+    const property = await this.cancelPropertyUseCase.execute(
+      new CancelPropertyCommand(id),
+    );
+    return PropertyResponseMapper.toDto(property);
   }
 }

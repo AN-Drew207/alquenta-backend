@@ -7,6 +7,7 @@ import { UpdatePropertyUseCase } from './application/use-cases/update-property/u
 import { DeletePropertyUseCase } from './application/use-cases/delete-property/delete-property.use-case';
 import { ListPropertiesUseCase } from './application/use-cases/list-properties/list-properties.use-case';
 import { GetPropertyByIdUseCase } from './application/use-cases/get-property-by-id/get-property-by-id.use-case';
+import { CancelPropertyUseCase } from './application/use-cases/cancel-property/cancel-property.use-case';
 import { PropertiesController } from './presentation/http/properties.controller';
 
 @Module({
@@ -19,6 +20,7 @@ import { PropertiesController } from './presentation/http/properties.controller'
     DeletePropertyUseCase,
     ListPropertiesUseCase,
     GetPropertyByIdUseCase,
+    CancelPropertyUseCase,
   ],
   exports: [PropertyRepository],
 })

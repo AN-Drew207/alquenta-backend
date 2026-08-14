@@ -1,7 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { createTestApp, extractCookie, loginAndExtractCookie, seedAdmin } from './utils/create-test-app';
+import {
+  createTestApp,
+  extractCookie,
+  loginAndExtractCookie,
+  seedAdmin,
+} from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
 describe('Messaging (e2e)', () => {
@@ -63,7 +68,9 @@ describe('Messaging (e2e)', () => {
       where: { authorId: { in: userIds } },
     });
     await prisma.conversation.deleteMany({
-      where: { OR: [{ clientId: { in: userIds } }, { adminId: { in: userIds } }] },
+      where: {
+        OR: [{ clientId: { in: userIds } }, { adminId: { in: userIds } }],
+      },
     });
     await prisma.property.deleteMany({ where: { adminId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
@@ -151,7 +158,9 @@ describe('Messaging (e2e)', () => {
       .expect(200);
 
     expect(
-      messages.body.some((m: { content: string }) => m.content === 'Sure, still available'),
+      messages.body.some(
+        (m: { content: string }) => m.content === 'Sure, still available',
+      ),
     ).toBe(true);
   });
 

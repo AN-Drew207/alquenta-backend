@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
@@ -10,7 +18,10 @@ import { UpdateProfileCommand } from '../../application/use-cases/update-profile
 import { RequestEmailChangeUseCase } from '../../application/use-cases/request-email-change/request-email-change.use-case';
 import { RequestEmailChangeCommand } from '../../application/use-cases/request-email-change/request-email-change.command';
 import { ConfirmEmailChangeUseCase } from '../../application/use-cases/confirm-email-change/confirm-email-change.use-case';
-import { isReservedUsername, PatchProfileRequestDto } from './dto/patch-profile-request.dto';
+import {
+  isReservedUsername,
+  PatchProfileRequestDto,
+} from './dto/patch-profile-request.dto';
 import { RequestEmailChangeRequestDto } from './dto/request-email-change-request.dto';
 import { UsernameAvailabilityResponseDto } from './dto/username-availability-response.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
@@ -46,12 +57,13 @@ export class ProfileController {
   ): Promise<ProfileResponseDto> {
     const user = await this.updateProfileUseCase.execute(
       new UpdateProfileCommand(authenticatedUser.id, {
-        name: dto.name,
+        displayName: dto.displayName,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         username:
           dto.username !== undefined
             ? (dto.username?.toLowerCase() ?? null)
             : undefined,
-        accountType: dto.accountType,
         avatarUrl: dto.avatarUrl,
         bio: dto.bio,
         city: dto.city,
@@ -59,12 +71,23 @@ export class ProfileController {
         website: dto.website,
         phone: dto.phone,
         altPhone: dto.altPhone,
-        showPhoneOnListings: dto.showPhoneOnListings,
+        showWhatsapp: dto.showWhatsapp,
         allowCalls: dto.allowCalls,
         showEmail: dto.showEmail,
-        notificationPrefs: dto.notificationPrefs,
-        privacyPrefs: dto.privacyPrefs,
         generalPrefs: dto.generalPrefs,
+      }),
+    );
+    return UserResponseMapper.toProfileDto(user);
+  }
+
+  @ApiOperation({ summary: "Clear the authenticated user's avatar" })
+  @Delete('avatar')
+  async deleteAvatar(
+    @CurrentUser() authenticatedUser: AuthenticatedUser,
+  ): Promise<ProfileResponseDto> {
+    const user = await this.updateProfileUseCase.execute(
+      new UpdateProfileCommand(authenticatedUser.id, {
+        avatarUrl: null,
       }),
     );
     return UserResponseMapper.toProfileDto(user);
@@ -85,7 +108,8 @@ export class ProfileController {
   }
 
   @ApiOperation({
-    summary: 'Request an email change — sends a confirmation link to the new address',
+    summary:
+      'Request an email change — sends a confirmation link to the new address',
   })
   @Post('email')
   async requestEmailChange(
@@ -98,10 +122,14 @@ export class ProfileController {
     return { ok: true };
   }
 
-  @ApiOperation({ summary: 'Confirm a pending email change from the emailed link' })
+  @ApiOperation({
+    summary: 'Confirm a pending email change from the emailed link',
+  })
   @Public()
   @Get('email/confirm')
-  async confirmEmailChange(@Query('token') token: string): Promise<ProfileResponseDto> {
+  async confirmEmailChange(
+    @Query('token') token: string,
+  ): Promise<ProfileResponseDto> {
     const user = await this.confirmEmailChangeUseCase.execute(token);
     return UserResponseMapper.toProfileDto(user);
   }

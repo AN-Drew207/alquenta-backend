@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../../../../shared/domain/role.enum';
 import { AccountType } from '../../../domain/enums/account-type.enum';
-import type {
-  GeneralPrefs,
-  NotificationPrefs,
-  PrivacyPrefs,
-} from '../../../domain/entities/user-preferences';
+import type { GeneralPrefs } from '../../../domain/entities/user-preferences';
+
+export class ProfileCompletionDto {
+  @ApiProperty()
+  pct: number;
+
+  @ApiProperty({ type: [String] })
+  missing: string[];
+}
 
 export class ProfileResponseDto {
   @ApiProperty()
@@ -20,8 +24,17 @@ export class ProfileResponseDto {
   @ApiProperty()
   emailVerified: boolean;
 
+  @ApiProperty({
+    description:
+      'Alias for the underlying `name` column, shown throughout the header, conversations, and property listings.',
+  })
+  displayName: string;
+
   @ApiProperty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty()
+  lastName: string;
 
   @ApiProperty({ required: false, nullable: true })
   username: string | null;
@@ -54,10 +67,7 @@ export class ProfileResponseDto {
   altPhone: string | null;
 
   @ApiProperty()
-  phoneVerified: boolean;
-
-  @ApiProperty()
-  showPhoneOnListings: boolean;
+  showWhatsapp: boolean;
 
   @ApiProperty()
   allowCalls: boolean;
@@ -66,20 +76,14 @@ export class ProfileResponseDto {
   showEmail: boolean;
 
   @ApiProperty()
-  notificationPrefs: NotificationPrefs;
-
-  @ApiProperty()
-  privacyPrefs: PrivacyPrefs;
-
-  @ApiProperty()
   generalPrefs: GeneralPrefs;
-
-  @ApiProperty()
-  twoFactorEnabled: boolean;
 
   @ApiProperty({ required: false, nullable: true })
   deactivatedAt: Date | null;
 
   @ApiProperty()
-  completeness: number;
+  createdAt: Date;
+
+  @ApiProperty({ type: ProfileCompletionDto })
+  completion: ProfileCompletionDto;
 }

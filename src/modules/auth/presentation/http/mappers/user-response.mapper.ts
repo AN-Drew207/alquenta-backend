@@ -12,7 +12,7 @@ export class UserResponseMapper {
       name: user.name,
       role: user.role,
       phone: user.phone,
-      showPhoneOnListings: user.showPhoneOnListings,
+      showWhatsapp: user.showWhatsapp,
     };
   }
 
@@ -30,7 +30,9 @@ export class UserResponseMapper {
       email: user.email,
       pendingEmail: user.pendingEmail,
       emailVerified: user.emailVerified,
-      name: user.name,
+      displayName: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       username: user.username,
       role: user.role,
       accountType: user.accountType,
@@ -41,16 +43,13 @@ export class UserResponseMapper {
       website: user.website,
       phone: user.phone,
       altPhone: user.altPhone,
-      phoneVerified: user.phoneVerified,
-      showPhoneOnListings: user.showPhoneOnListings,
+      showWhatsapp: user.showWhatsapp,
       allowCalls: user.allowCalls,
       showEmail: user.showEmail,
-      notificationPrefs: user.notificationPrefs,
-      privacyPrefs: user.privacyPrefs,
       generalPrefs: user.generalPrefs,
-      twoFactorEnabled: user.twoFactorEnabled,
       deactivatedAt: user.deactivatedAt,
-      completeness: user.completeness,
+      createdAt: user.createdAt,
+      completion: user.completion,
     };
   }
 

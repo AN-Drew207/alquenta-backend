@@ -18,5 +18,5 @@ export class UserResponseDto {
   phone: string | null;
 
   @ApiProperty()
-  showPhoneOnListings: boolean;
+  showWhatsapp: boolean;
 }

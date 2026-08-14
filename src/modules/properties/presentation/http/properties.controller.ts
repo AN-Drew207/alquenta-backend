@@ -103,8 +103,7 @@ export class PropertiesController {
     const property = await this.getByIdUseCase.execute(id);
     const admin = await this.userRepository.findById(property.adminId);
     const contactWhatsapp =
-      property.whatsapp ??
-      (admin?.showPhoneOnListings ? admin.phone : null);
+      property.whatsapp ?? (admin?.showWhatsapp ? admin.phone : null);
     return PropertyResponseMapper.toDto(property, contactWhatsapp);
   }
 
@@ -168,7 +167,8 @@ export class PropertiesController {
   }
 
   @ApiOperation({
-    summary: 'Cancel any admin\'s listing regardless of ownership (SUPERADMIN oversight)',
+    summary:
+      "Cancel any admin's listing regardless of ownership (SUPERADMIN oversight)",
   })
   @Roles(Role.SUPERADMIN)
   @Patch(':id/cancel')

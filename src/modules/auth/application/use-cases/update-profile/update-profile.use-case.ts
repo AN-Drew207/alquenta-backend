@@ -7,9 +7,10 @@ import { UsernameTakenException } from '../../../domain/exceptions/username-take
 import { UpdateProfileCommand } from './update-profile.command';
 
 @Injectable()
-export class UpdateProfileUseCase
-  implements UseCase<UpdateProfileCommand, User>
-{
+export class UpdateProfileUseCase implements UseCase<
+  UpdateProfileCommand,
+  User
+> {
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(command: UpdateProfileCommand): Promise<User> {
@@ -29,7 +30,14 @@ export class UpdateProfileUseCase
       }
     }
 
-    user.updateProfile(fields);
+    // `displayName` is a profile-facing alias for the underlying `name`
+    // column — writing it here is intentional so it propagates to every
+    // other place that reads `user.name` (header, conversations, listings).
+    const { displayName, ...rest } = fields;
+    user.updateProfile({
+      ...rest,
+      ...(displayName !== undefined ? { name: displayName } : {}),
+    });
     await this.userRepository.save(user);
     return user;
   }

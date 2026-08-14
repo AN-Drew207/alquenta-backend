@@ -51,12 +51,18 @@ export async function seedAdmin(
   prisma: PrismaService,
   params: { email: string; password: string; name: string },
 ): Promise<void> {
+  const spaceIndex = params.name.indexOf(' ');
+  const firstName =
+    spaceIndex === -1 ? params.name : params.name.slice(0, spaceIndex);
+  const lastName = spaceIndex === -1 ? ' ' : params.name.slice(spaceIndex + 1);
   await prisma.user.create({
     data: {
       id: randomUUID(),
       email: params.email,
       passwordHash: await bcrypt.hash(params.password, 10),
       name: params.name,
+      firstName,
+      lastName,
       role: 'ADMIN',
     },
   });

@@ -1,7 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { createTestApp, loginAndExtractCookie, seedAdmin } from './utils/create-test-app';
+import {
+  createTestApp,
+  loginAndExtractCookie,
+  seedAdmin,
+} from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
 describe('Properties (e2e)', () => {
@@ -59,7 +63,10 @@ describe('Properties (e2e)', () => {
       })
       .expect(201);
 
-    expect(res.body).toMatchObject({ title: 'E2E Test Apartment', status: 'AVAILABLE' });
+    expect(res.body).toMatchObject({
+      title: 'E2E Test Apartment',
+      status: 'AVAILABLE',
+    });
     propertyId = res.body.id;
   });
 
@@ -68,7 +75,9 @@ describe('Properties (e2e)', () => {
       .get('/api/properties')
       .expect(200);
 
-    expect(res.body.some((p: { id: string }) => p.id === propertyId)).toBe(true);
+    expect(res.body.some((p: { id: string }) => p.id === propertyId)).toBe(
+      true,
+    );
   });
 
   it('returns the property by id without auth', () => {

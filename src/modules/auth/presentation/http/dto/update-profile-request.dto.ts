@@ -10,5 +10,5 @@ export class UpdateProfileRequestDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  showPhoneOnListings?: boolean;
+  showWhatsapp?: boolean;
 }

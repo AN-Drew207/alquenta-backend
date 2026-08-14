@@ -25,7 +25,6 @@ export interface PrivacyPrefs {
 
 export interface GeneralPrefs {
   locale: 'es' | 'en' | 'pt';
-  currency: 'USD' | 'VES' | 'EUR';
   theme: 'light' | 'dark' | 'system';
 }
 
@@ -52,6 +51,5 @@ export const DEFAULT_PRIVACY_PREFS: PrivacyPrefs = {
 
 export const DEFAULT_GENERAL_PREFS: GeneralPrefs = {
   locale: 'es',
-  currency: 'USD',
   theme: 'system',
 };

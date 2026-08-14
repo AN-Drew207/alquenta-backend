@@ -26,6 +26,8 @@ describe('Auth (e2e)', () => {
         email: adminEmail,
         passwordHash: await bcrypt.hash(password, 10),
         name: 'E2E Admin',
+        firstName: 'E2E',
+        lastName: 'Admin',
         role: 'ADMIN',
       },
     });
@@ -52,7 +54,12 @@ describe('Auth (e2e)', () => {
   it('rejects registering with a role in the payload (no public ADMIN sign-up)', () => {
     return request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: 'unused@e2e-auth.test', password, name: 'Nope', role: 'ADMIN' })
+      .send({
+        email: 'unused@e2e-auth.test',
+        password,
+        name: 'Nope',
+        role: 'ADMIN',
+      })
       .expect(400);
   });
 

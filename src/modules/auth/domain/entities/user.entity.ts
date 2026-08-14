@@ -10,8 +10,41 @@ import {
   PrivacyPrefs,
 } from './user-preferences';
 
+/**
+ * Splits a display name into firstName/lastName the same way the
+ * `add_first_last_name_and_rename_show_whatsapp` migration backfilled
+ * existing rows: everything before the first space is the first name,
+ * everything after is the last name. When there is no space, the whole
+ * value becomes the first name and the last name falls back to a single
+ * space (" ").
+ */
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const trimmed = fullName.trim();
+  const spaceIndex = trimmed.indexOf(' ');
+  if (spaceIndex === -1) {
+    return { firstName: trimmed, lastName: ' ' };
+  }
+  return {
+    firstName: trimmed.slice(0, spaceIndex),
+    lastName: trimmed.slice(spaceIndex + 1),
+  };
+}
+
+export interface ProfileCompletion {
+  pct: number;
+  missing: string[];
+}
+
+interface CompletionRule {
+  key: string;
+  weight: number;
+  met: boolean;
+}
+
 export interface UserProfileChanges {
   name?: string;
+  firstName?: string;
+  lastName?: string;
   username?: string | null;
   accountType?: AccountType;
   avatarUrl?: string | null;
@@ -21,7 +54,7 @@ export interface UserProfileChanges {
   website?: string | null;
   phone?: string | null;
   altPhone?: string | null;
-  showPhoneOnListings?: boolean;
+  showWhatsapp?: boolean;
   allowCalls?: boolean;
   showEmail?: boolean;
   notificationPrefs?: NotificationPrefs;
@@ -38,6 +71,8 @@ export class User {
     private _emailVerified: boolean,
     private _passwordHash: string,
     private _name: string,
+    private _firstName: string,
+    private _lastName: string,
     private _username: string | null,
     private readonly _role: Role,
     private _accountType: AccountType,
@@ -49,7 +84,7 @@ export class User {
     private _phone: string | null,
     private _altPhone: string | null,
     private _phoneVerified: boolean,
-    private _showPhoneOnListings: boolean,
+    private _showWhatsapp: boolean,
     private _allowCalls: boolean,
     private _showEmail: boolean,
     private _notificationPrefs: NotificationPrefs,
@@ -67,6 +102,7 @@ export class User {
     role: Role;
     phone?: string | null;
   }): User {
+    const { firstName, lastName } = splitName(params.name);
     return new User(
       randomUUID(),
       params.email,
@@ -74,6 +110,8 @@ export class User {
       false,
       params.passwordHash,
       params.name,
+      firstName,
+      lastName,
       null,
       params.role,
       params.role === Role.ADMIN ? AccountType.OWNER : AccountType.CLIENT,
@@ -104,6 +142,8 @@ export class User {
     emailVerified: boolean;
     passwordHash: string;
     name: string;
+    firstName: string;
+    lastName: string;
     username: string | null;
     role: Role;
     accountType: AccountType;
@@ -115,7 +155,7 @@ export class User {
     phone: string | null;
     altPhone: string | null;
     phoneVerified: boolean;
-    showPhoneOnListings: boolean;
+    showWhatsapp: boolean;
     allowCalls: boolean;
     showEmail: boolean;
     notificationPrefs: NotificationPrefs | null;
@@ -132,6 +172,8 @@ export class User {
       params.emailVerified,
       params.passwordHash,
       params.name,
+      params.firstName,
+      params.lastName,
       params.username,
       params.role,
       params.accountType,
@@ -143,7 +185,7 @@ export class User {
       params.phone,
       params.altPhone,
       params.phoneVerified,
-      params.showPhoneOnListings,
+      params.showWhatsapp,
       params.allowCalls,
       params.showEmail,
       params.notificationPrefs ?? DEFAULT_NOTIFICATION_PREFS,
@@ -157,8 +199,11 @@ export class User {
 
   updateProfile(changes: UserProfileChanges): void {
     if (changes.name !== undefined) this._name = changes.name;
+    if (changes.firstName !== undefined) this._firstName = changes.firstName;
+    if (changes.lastName !== undefined) this._lastName = changes.lastName;
     if (changes.username !== undefined) this._username = changes.username;
-    if (changes.accountType !== undefined) this._accountType = changes.accountType;
+    if (changes.accountType !== undefined)
+      this._accountType = changes.accountType;
     if (changes.avatarUrl !== undefined) this._avatarUrl = changes.avatarUrl;
     if (changes.bio !== undefined) this._bio = changes.bio;
     if (changes.city !== undefined) this._city = changes.city;
@@ -166,16 +211,18 @@ export class User {
     if (changes.website !== undefined) this._website = changes.website;
     if (changes.phone !== undefined) this._phone = changes.phone;
     if (changes.altPhone !== undefined) this._altPhone = changes.altPhone;
-    if (changes.showPhoneOnListings !== undefined) {
-      this._showPhoneOnListings = changes.showPhoneOnListings;
+    if (changes.showWhatsapp !== undefined) {
+      this._showWhatsapp = changes.showWhatsapp;
     }
     if (changes.allowCalls !== undefined) this._allowCalls = changes.allowCalls;
     if (changes.showEmail !== undefined) this._showEmail = changes.showEmail;
     if (changes.notificationPrefs !== undefined) {
       this._notificationPrefs = changes.notificationPrefs;
     }
-    if (changes.privacyPrefs !== undefined) this._privacyPrefs = changes.privacyPrefs;
-    if (changes.generalPrefs !== undefined) this._generalPrefs = changes.generalPrefs;
+    if (changes.privacyPrefs !== undefined)
+      this._privacyPrefs = changes.privacyPrefs;
+    if (changes.generalPrefs !== undefined)
+      this._generalPrefs = changes.generalPrefs;
     if (changes.twoFactorEnabled !== undefined) {
       this._twoFactorEnabled = changes.twoFactorEnabled;
     }
@@ -236,6 +283,14 @@ export class User {
     return this._name;
   }
 
+  get firstName(): string {
+    return this._firstName;
+  }
+
+  get lastName(): string {
+    return this._lastName;
+  }
+
   get username(): string | null {
     return this._username;
   }
@@ -280,8 +335,8 @@ export class User {
     return this._phoneVerified;
   }
 
-  get showPhoneOnListings(): boolean {
-    return this._showPhoneOnListings;
+  get showWhatsapp(): boolean {
+    return this._showWhatsapp;
   }
 
   get allowCalls(): boolean {
@@ -316,16 +371,44 @@ export class User {
     return this._createdAt;
   }
 
-  /** Weighted profile completeness, 0-100. */
-  get completeness(): number {
-    let score = 0;
-    if (this._avatarUrl) score += 20;
-    if (this._name.trim().length > 0) score += 15;
-    if (this._bio && this._bio.trim().length > 0) score += 15;
-    if (this._city && this._state) score += 10;
-    if (this._accountType) score += 10;
-    if (this._emailVerified) score += 15;
-    if (this._phoneVerified) score += 15;
-    return Math.min(100, score);
+  /**
+   * Weighted profile completion: a 0-100 percentage plus the list of
+   * missing items sorted heaviest-first, so the frontend can surface the
+   * top N nudges. Weights sum to 100.
+   */
+  get completion(): ProfileCompletion {
+    const rules: CompletionRule[] = [
+      { key: 'avatar', weight: 25, met: !!this._avatarUrl },
+      {
+        key: 'displayName',
+        weight: 15,
+        met: this._name.trim().length >= 3,
+      },
+      {
+        key: 'bio',
+        weight: 15,
+        met: !!this._bio && this._bio.trim().length >= 30,
+      },
+      { key: 'phone', weight: 15, met: !!this._phone },
+      { key: 'username', weight: 10, met: !!this._username },
+      { key: 'location', weight: 10, met: !!this._city && !!this._state },
+      { key: 'email', weight: 10, met: this._emailVerified === true },
+    ];
+
+    let pct = 0;
+    const missing: CompletionRule[] = [];
+    for (const rule of rules) {
+      if (rule.met) {
+        pct += rule.weight;
+      } else {
+        missing.push(rule);
+      }
+    }
+    missing.sort((a, b) => b.weight - a.weight);
+
+    return {
+      pct: Math.min(100, pct),
+      missing: missing.map((rule) => rule.key),
+    };
   }
 }

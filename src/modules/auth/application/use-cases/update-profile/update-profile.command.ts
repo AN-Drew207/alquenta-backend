@@ -6,7 +6,10 @@ import {
 } from '../../../domain/entities/user-preferences';
 
 export interface UpdateProfileCommandFields {
-  name?: string;
+  /** Alias for the underlying `name` column — see User.updateProfile(). */
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
   username?: string | null;
   accountType?: AccountType;
   avatarUrl?: string | null;
@@ -16,7 +19,7 @@ export interface UpdateProfileCommandFields {
   website?: string | null;
   phone?: string | null;
   altPhone?: string | null;
-  showPhoneOnListings?: boolean;
+  showWhatsapp?: boolean;
   allowCalls?: boolean;
   showEmail?: boolean;
   notificationPrefs?: NotificationPrefs;

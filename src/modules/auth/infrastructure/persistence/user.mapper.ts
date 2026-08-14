@@ -1,4 +1,7 @@
-import { Prisma, User as PrismaUser } from '../../../../../generated/prisma/client';
+import {
+  Prisma,
+  User as PrismaUser,
+} from '../../../../../generated/prisma/client';
 import { Role } from '../../../../shared/domain/role.enum';
 import { AccountType } from '../../domain/enums/account-type.enum';
 import { User } from '../../domain/entities/user.entity';
@@ -17,6 +20,8 @@ export class UserMapper {
       emailVerified: row.emailVerified,
       passwordHash: row.passwordHash,
       name: row.name,
+      firstName: row.firstName,
+      lastName: row.lastName,
       username: row.username,
       role: row.role as Role,
       accountType: row.accountType as AccountType,
@@ -28,10 +33,11 @@ export class UserMapper {
       phone: row.phone,
       altPhone: row.altPhone,
       phoneVerified: row.phoneVerified,
-      showPhoneOnListings: row.showPhoneOnListings,
+      showWhatsapp: row.showWhatsapp,
       allowCalls: row.allowCalls,
       showEmail: row.showEmail,
-      notificationPrefs: row.notificationPrefs as unknown as NotificationPrefs | null,
+      notificationPrefs:
+        row.notificationPrefs as unknown as NotificationPrefs | null,
       privacyPrefs: row.privacyPrefs as unknown as PrivacyPrefs | null,
       generalPrefs: row.generalPrefs as unknown as GeneralPrefs | null,
       twoFactorEnabled: row.twoFactorEnabled,
@@ -48,6 +54,8 @@ export class UserMapper {
       emailVerified: user.emailVerified,
       passwordHash: user.passwordHash,
       name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       username: user.username,
       role: user.role,
       accountType: user.accountType,
@@ -59,10 +67,11 @@ export class UserMapper {
       phone: user.phone,
       altPhone: user.altPhone,
       phoneVerified: user.phoneVerified,
-      showPhoneOnListings: user.showPhoneOnListings,
+      showWhatsapp: user.showWhatsapp,
       allowCalls: user.allowCalls,
       showEmail: user.showEmail,
-      notificationPrefs: user.notificationPrefs as unknown as Prisma.InputJsonValue,
+      notificationPrefs:
+        user.notificationPrefs as unknown as Prisma.InputJsonValue,
       privacyPrefs: user.privacyPrefs as unknown as Prisma.InputJsonValue,
       generalPrefs: user.generalPrefs as unknown as Prisma.InputJsonValue,
       twoFactorEnabled: user.twoFactorEnabled,

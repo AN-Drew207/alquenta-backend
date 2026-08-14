@@ -69,7 +69,9 @@ export class AuthController {
     return UserResponseMapper.toDto(user);
   }
 
-  @ApiOperation({ summary: 'Log in with email and password, sets the session cookie' })
+  @ApiOperation({
+    summary: 'Log in with email and password, sets the session cookie',
+  })
   @Public()
   @Post('login')
   @HttpCode(200)
@@ -85,7 +87,9 @@ export class AuthController {
     return UserResponseMapper.toDto(user);
   }
 
-  @ApiOperation({ summary: 'Log out by clearing the session cookie and revoking the session' })
+  @ApiOperation({
+    summary: 'Log out by clearing the session cookie and revoking the session',
+  })
   @Post('logout')
   @HttpCode(200)
   async logout(
@@ -99,7 +103,9 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Get the currently authenticated user' })
   @Get('me')
-  async me(@CurrentUser() authenticatedUser: AuthenticatedUser): Promise<UserResponseDto> {
+  async me(
+    @CurrentUser() authenticatedUser: AuthenticatedUser,
+  ): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(authenticatedUser.id);
     if (!user) {
       throw new EntityNotFoundException('User', authenticatedUser.id);
@@ -116,7 +122,7 @@ export class AuthController {
     const user = await this.updateProfileUseCase.execute(
       new UpdateProfileCommand(authenticatedUser.id, {
         phone: dto.phone,
-        showPhoneOnListings: dto.showPhoneOnListings,
+        showWhatsapp: dto.showWhatsapp,
       }),
     );
     return UserResponseMapper.toDto(user);

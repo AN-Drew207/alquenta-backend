@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsEnum,
   IsObject,
   IsOptional,
   IsString,
@@ -10,12 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { AccountType } from '../../../domain/enums/account-type.enum';
-import type {
-  GeneralPrefs,
-  NotificationPrefs,
-  PrivacyPrefs,
-} from '../../../domain/entities/user-preferences';
+import type { GeneralPrefs } from '../../../domain/entities/user-preferences';
 
 const RESERVED_USERNAMES = new Set([
   'admin',
@@ -37,13 +31,38 @@ export function isReservedUsername(username: string): boolean {
 }
 
 export class PatchProfileRequestDto {
+  @ApiProperty({
+    required: false,
+    minLength: 1,
+    maxLength: 60,
+    description:
+      'Alias for the underlying `name` column. Changing it propagates to the header, conversations, and property listings.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(60)
+  displayName?: string;
+
   @ApiProperty({ required: false, minLength: 2, maxLength: 40 })
   @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(40)
-  @Matches(/^[^0-9]*$/, { message: 'name must not contain digits' })
-  name?: string;
+  @Matches(/^[\p{L}\s]+$/u, {
+    message: 'firstName must contain letters and spaces only',
+  })
+  firstName?: string;
+
+  @ApiProperty({ required: false, minLength: 2, maxLength: 40 })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(40)
+  @Matches(/^[\p{L}\s]+$/u, {
+    message: 'lastName must contain letters and spaces only',
+  })
+  lastName?: string;
 
   @ApiProperty({ required: false, nullable: true, minLength: 3, maxLength: 24 })
   @IsOptional()
@@ -52,11 +71,6 @@ export class PatchProfileRequestDto {
       'username must be 3-24 characters, lowercase letters, numbers, and underscores only',
   })
   username?: string | null;
-
-  @ApiProperty({ required: false, enum: AccountType })
-  @IsOptional()
-  @IsEnum(AccountType)
-  accountType?: AccountType;
 
   @ApiProperty({ required: false, nullable: true })
   @IsOptional()
@@ -97,7 +111,7 @@ export class PatchProfileRequestDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsBoolean()
-  showPhoneOnListings?: boolean;
+  showWhatsapp?: boolean;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -108,16 +122,6 @@ export class PatchProfileRequestDto {
   @IsOptional()
   @IsBoolean()
   showEmail?: boolean;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsObject()
-  notificationPrefs?: NotificationPrefs;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsObject()
-  privacyPrefs?: PrivacyPrefs;
 
   @ApiProperty({ required: false })
   @IsOptional()

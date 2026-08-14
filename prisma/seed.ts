@@ -7,6 +7,18 @@ import { PrismaPg } from '@prisma/adapter-pg';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const trimmed = fullName.trim();
+  const spaceIndex = trimmed.indexOf(' ');
+  if (spaceIndex === -1) {
+    return { firstName: trimmed, lastName: ' ' };
+  }
+  return {
+    firstName: trimmed.slice(0, spaceIndex),
+    lastName: trimmed.slice(spaceIndex + 1),
+  };
+}
+
 async function main() {
   const passwordHash = await bcrypt.hash('password123', 10);
 
@@ -18,6 +30,7 @@ async function main() {
       email: 'admin1@example.com',
       passwordHash,
       name: 'Ada Realty',
+      ...splitName('Ada Realty'),
       role: 'ADMIN',
     },
   });
@@ -30,6 +43,7 @@ async function main() {
       email: 'admin2@example.com',
       passwordHash,
       name: 'Bruno Properties',
+      ...splitName('Bruno Properties'),
       role: 'ADMIN',
     },
   });
@@ -42,6 +56,7 @@ async function main() {
       email: 'client1@example.com',
       passwordHash,
       name: 'Test Client',
+      ...splitName('Test Client'),
       role: 'CLIENT',
     },
   });

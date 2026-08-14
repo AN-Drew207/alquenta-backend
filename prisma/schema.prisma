@@ -58,6 +58,8 @@ model User {
   emailVerified Boolean @default(true)
   passwordHash String
   name         String
+  firstName    String
+  lastName     String
   username     String?  @unique
   role         Role
   accountType  AccountType @default(CLIENT)
@@ -69,7 +71,7 @@ model User {
   phone        String?
   altPhone     String?
   phoneVerified Boolean @default(false)
-  showPhoneOnListings Boolean  @default(false)
+  showWhatsapp Boolean  @default(false)
   allowCalls   Boolean  @default(false)
   showEmail    Boolean  @default(false)
   notificationPrefs Json?

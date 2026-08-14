@@ -32,6 +32,8 @@ describe('PrismaUnitOfWork', () => {
             email,
             passwordHash: 'x',
             name: 'Rollback Test',
+            firstName: 'Rollback',
+            lastName: 'Test',
             role: 'CLIENT',
           },
         });

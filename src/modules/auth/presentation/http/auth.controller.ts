@@ -10,7 +10,6 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Request, Response } from 'express';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
@@ -51,7 +50,6 @@ export class AuthController {
     private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly acceptAdminInvitationUseCase: AcceptAdminInvitationUseCase,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
     private readonly userRepository: UserRepository,
     private readonly sessionRepository: SessionRepository,
   ) {}
@@ -120,7 +118,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ ok: true }> {
     await this.sessionRepository.delete(authenticatedUser.sessionId);
-    res.clearCookie(COOKIE_NAME, cookieOptions(this.configService));
+    res.clearCookie(COOKIE_NAME, cookieOptions());
     return { ok: true };
   }
 
@@ -203,7 +201,7 @@ export class AuthController {
       sid: session.id,
     });
     res.cookie(COOKIE_NAME, token, {
-      ...cookieOptions(this.configService),
+      ...cookieOptions(),
       maxAge: COOKIE_MAX_AGE_MS,
     });
   }

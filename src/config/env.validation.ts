@@ -37,6 +37,18 @@ class EnvironmentVariables {
   @IsNotEmpty()
   DATABASE_URL: string;
 
+  /**
+   * Direct (non-pooled) connection used only by Prisma Migrate. PgBouncer's
+   * transaction-mode pooling (the "-pooler" host in DATABASE_URL) can't hold
+   * the session-level advisory lock migrate deploy needs, which times out
+   * with P1002. Same credentials/db as DATABASE_URL, host without "-pooler".
+   * Not needed locally against a non-pooled dev database — only required
+   * where DATABASE_URL itself goes through a pooler (Render dev/prod, Neon).
+   */
+  @IsString()
+  @IsOptional()
+  DIRECT_URL?: string;
+
   @IsString()
   @IsNotEmpty()
   FRONT_URL: string;

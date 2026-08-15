@@ -21,6 +21,8 @@ import { RegisterUseCase } from '../../application/use-cases/register/register.u
 import { RegisterCommand } from '../../application/use-cases/register/register.command';
 import { LoginUseCase } from '../../application/use-cases/login/login.use-case';
 import { LoginCommand } from '../../application/use-cases/login/login.command';
+import { ReactivateAccountUseCase } from '../../application/use-cases/reactivate-account/reactivate-account.use-case';
+import { ReactivateAccountCommand } from '../../application/use-cases/reactivate-account/reactivate-account.command';
 import { UpdateProfileUseCase } from '../../application/use-cases/update-profile/update-profile.use-case';
 import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
 import { AcceptAdminInvitationUseCase } from '../../application/use-cases/accept-admin-invitation/accept-admin-invitation.use-case';
@@ -31,6 +33,7 @@ import { Session } from '../../domain/entities/session.entity';
 import { SessionRepository } from '../../domain/repositories/session.repository';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
+import { ReactivateAccountRequestDto } from './dto/reactivate-account-request.dto';
 import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 import { AcceptAdminInvitationRequestDto } from './dto/accept-admin-invitation-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -44,6 +47,7 @@ export class AuthController {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly reactivateAccountUseCase: ReactivateAccountUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly acceptAdminInvitationUseCase: AcceptAdminInvitationUseCase,
     private readonly jwtService: JwtService,
@@ -82,6 +86,25 @@ export class AuthController {
   ): Promise<UserResponseDto> {
     const user = await this.loginUseCase.execute(
       new LoginCommand(dto.email, dto.password),
+    );
+    await this.createSessionAndSetCookie(req, res, user);
+    return UserResponseMapper.toDto(user);
+  }
+
+  @ApiOperation({
+    summary:
+      'Reactivate a self-deactivated account (re-verifies credentials) and sign in. Accounts disabled by a superadmin cannot be reactivated this way.',
+  })
+  @Public()
+  @Post('reactivate')
+  @HttpCode(200)
+  async reactivate(
+    @Body() dto: ReactivateAccountRequestDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<UserResponseDto> {
+    const user = await this.reactivateAccountUseCase.execute(
+      new ReactivateAccountCommand(dto.email, dto.password),
     );
     await this.createSessionAndSetCookie(req, res, user);
     return UserResponseMapper.toDto(user);

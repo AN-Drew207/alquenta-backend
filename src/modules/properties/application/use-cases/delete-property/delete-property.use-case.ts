@@ -5,13 +5,17 @@ import { PropertyRepository } from '../../../domain/repositories/property.reposi
 import { PropertyNotOwnedByAdminException } from '../../../domain/exceptions/property-not-owned-by-admin.exception';
 import { PropertyNotCancelledException } from '../../../domain/exceptions/property-not-cancelled.exception';
 import { PropertyStatus } from '../../../domain/enums/property-status.enum';
+import { MediaService } from '../../../../media/media.service';
 import { DeletePropertyCommand } from './delete-property.command';
 
 @Injectable()
 export class DeletePropertyUseCase
   implements UseCase<DeletePropertyCommand, void>
 {
-  constructor(private readonly propertyRepository: PropertyRepository) {}
+  constructor(
+    private readonly propertyRepository: PropertyRepository,
+    private readonly mediaService: MediaService,
+  ) {}
 
   async execute(command: DeletePropertyCommand): Promise<void> {
     const property = await this.propertyRepository.findById(
@@ -28,5 +32,9 @@ export class DeletePropertyUseCase
     }
 
     await this.propertyRepository.delete(command.propertyId);
+    await Promise.all([
+      this.mediaService.deleteAssets(property.images, 'image'),
+      this.mediaService.deleteAssets(property.videos, 'video'),
+    ]);
   }
 }

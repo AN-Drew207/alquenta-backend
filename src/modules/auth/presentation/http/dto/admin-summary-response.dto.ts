@@ -13,6 +13,9 @@ export class AdminSummaryResponseDto {
   @ApiProperty({ required: false, nullable: true })
   phone: string | null;
 
+  @ApiProperty({ required: false, nullable: true })
+  planId: string | null;
+
   @ApiProperty()
   createdAt: Date;
 

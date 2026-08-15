@@ -13,6 +13,9 @@ import { CurrentUser } from '../../../../shared/presentation/decorators/current-
 import type { AuthenticatedUser } from '../../../../shared/domain/authenticated-user.interface';
 import { EntityNotFoundException } from '../../../../shared/domain/exceptions/entity-not-found.exception';
 import { UserRepository } from '../../domain/repositories/user.repository';
+import { User } from '../../domain/entities/user.entity';
+import { PlanRepository } from '../../../plans/domain/repositories/plan.repository';
+import { PlanResponseMapper } from '../../../plans/presentation/http/mappers/plan-response.mapper';
 import { UpdateProfileUseCase } from '../../application/use-cases/update-profile/update-profile.use-case';
 import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
 import { RequestEmailChangeUseCase } from '../../application/use-cases/request-email-change/request-email-change.use-case';
@@ -32,10 +35,17 @@ import { UserResponseMapper } from './mappers/user-response.mapper';
 export class ProfileController {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly planRepository: PlanRepository,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly requestEmailChangeUseCase: RequestEmailChangeUseCase,
     private readonly confirmEmailChangeUseCase: ConfirmEmailChangeUseCase,
   ) {}
+
+  private async toProfileDto(user: User): Promise<ProfileResponseDto> {
+    const dto = UserResponseMapper.toProfileDto(user);
+    const plan = user.planId ? await this.planRepository.findById(user.planId) : null;
+    return { ...dto, plan: plan ? PlanResponseMapper.toDto(plan) : null };
+  }
 
   @ApiOperation({ summary: "Get the authenticated user's full profile" })
   @Get()
@@ -46,7 +56,7 @@ export class ProfileController {
     if (!user) {
       throw new EntityNotFoundException('User', authenticatedUser.id);
     }
-    return UserResponseMapper.toProfileDto(user);
+    return this.toProfileDto(user);
   }
 
   @ApiOperation({ summary: "Update the authenticated user's profile" })
@@ -77,7 +87,7 @@ export class ProfileController {
         generalPrefs: dto.generalPrefs,
       }),
     );
-    return UserResponseMapper.toProfileDto(user);
+    return this.toProfileDto(user);
   }
 
   @ApiOperation({ summary: "Clear the authenticated user's avatar" })
@@ -90,7 +100,7 @@ export class ProfileController {
         avatarUrl: null,
       }),
     );
-    return UserResponseMapper.toProfileDto(user);
+    return this.toProfileDto(user);
   }
 
   @ApiOperation({ summary: 'Check whether a username is available' })
@@ -131,6 +141,6 @@ export class ProfileController {
     @Query('token') token: string,
   ): Promise<ProfileResponseDto> {
     const user = await this.confirmEmailChangeUseCase.execute(token);
-    return UserResponseMapper.toProfileDto(user);
+    return this.toProfileDto(user);
   }
 }

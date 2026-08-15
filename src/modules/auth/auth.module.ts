@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { PlansModule } from '../plans/plans.module';
 import { UserRepository } from './domain/repositories/user.repository';
 import { SessionRepository } from './domain/repositories/session.repository';
 import { PasswordHasher } from './domain/ports/password-hasher';
@@ -11,6 +12,7 @@ import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { RegisterUseCase } from './application/use-cases/register/register.use-case';
 import { LoginUseCase } from './application/use-cases/login/login.use-case';
+import { ReactivateAccountUseCase } from './application/use-cases/reactivate-account/reactivate-account.use-case';
 import { UpdateProfileUseCase } from './application/use-cases/update-profile/update-profile.use-case';
 import { ChangePasswordUseCase } from './application/use-cases/change-password/change-password.use-case';
 import { RequestEmailChangeUseCase } from './application/use-cases/request-email-change/request-email-change.use-case';
@@ -29,6 +31,7 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
 
 @Module({
   imports: [
+    PlansModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -52,6 +55,7 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
     { provide: PasswordHasher, useClass: BcryptPasswordHasher },
     RegisterUseCase,
     LoginUseCase,
+    ReactivateAccountUseCase,
     UpdateProfileUseCase,
     ChangePasswordUseCase,
     RequestEmailChangeUseCase,

@@ -4,6 +4,8 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { PasswordHasher } from '../../../domain/ports/password-hasher';
 import { InvalidCredentialsException } from '../../../domain/exceptions/invalid-credentials.exception';
+import { AccountDeactivatedException } from '../../../domain/exceptions/account-deactivated.exception';
+import { AccountDisabledBySuperadminException } from '../../../domain/exceptions/account-disabled-by-superadmin.exception';
 import { LoginCommand } from './login.command';
 
 @Injectable()
@@ -25,6 +27,12 @@ export class LoginUseCase implements UseCase<LoginCommand, User> {
     );
     if (!isValid) {
       throw new InvalidCredentialsException();
+    }
+
+    if (user.deactivatedAt) {
+      throw user.deactivatedBySuperadmin
+        ? new AccountDisabledBySuperadminException()
+        : new AccountDeactivatedException();
     }
 
     return user;

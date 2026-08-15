@@ -19,7 +19,7 @@ export class DisableAdminUseCase implements UseCase<DisableAdminCommand, void> {
       throw new EntityNotFoundException('Admin', command.adminId);
     }
 
-    admin.deactivate();
+    admin.deactivate(true);
     await this.userRepository.save(admin);
     await this.sessionRepository.deleteAllForUser(command.adminId);
   }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validate } from './config/env.validation';
@@ -12,6 +13,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { MediaModule } from './modules/media/media.module';
+import { PlansModule } from './modules/plans/plans.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { MediaModule } from './modules/media/media.module';
       isGlobal: true,
       validate,
     }),
+    ScheduleModule.forRoot(),
     SharedModule,
+    PlansModule,
     AuthModule,
     PropertiesModule,
     NotificationsModule,

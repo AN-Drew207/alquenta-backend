@@ -17,6 +17,13 @@ enum Role {
   SUPERADMIN
 }
 
+enum PlanTier {
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
 enum PropertyType {
   HOUSE
   APARTMENT
@@ -63,6 +70,8 @@ model User {
   username     String?  @unique
   role         Role
   accountType  AccountType @default(CLIENT)
+  planId       String?
+  plan         Plan?    @relation(fields: [planId], references: [id])
   avatarUrl    String?
   bio          String?
   city         String?
@@ -79,6 +88,7 @@ model User {
   generalPrefs      Json?
   twoFactorEnabled  Boolean @default(false)
   deactivatedAt     DateTime?
+  deactivatedBySuperadmin Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -122,6 +132,7 @@ model Property {
   images        String[]
   videos        String[]
   whatsapp      String?
+  cancelledAt   DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -159,6 +170,18 @@ model Message {
   notifications Notification[]
 
   @@index([conversationId, createdAt])
+}
+
+model Plan {
+  id                  String   @id @default(uuid())
+  tier                PlanTier @unique
+  name                String
+  monthlyPriceUsd     Decimal  @db.Decimal(6, 2)
+  activeListingsLimit Int?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  users User[]
 }
 
 model Notification {

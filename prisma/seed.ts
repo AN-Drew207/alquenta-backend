@@ -22,9 +22,35 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
 async function main() {
   const passwordHash = await bcrypt.hash('password123', 10);
 
+  const plans = [
+    { tier: 'STARTER', name: 'Starter', monthlyPriceUsd: 15, activeListingsLimit: 10 },
+    { tier: 'PROFESSIONAL', name: 'Profesional', monthlyPriceUsd: 30, activeListingsLimit: 22 },
+    { tier: 'BUSINESS', name: 'Business', monthlyPriceUsd: 50, activeListingsLimit: 45 },
+    { tier: 'ENTERPRISE', name: 'Enterprise', monthlyPriceUsd: 100, activeListingsLimit: null },
+  ] as const;
+
+  const plansByTier: Record<string, { id: string }> = {};
+  for (const plan of plans) {
+    plansByTier[plan.tier] = await prisma.plan.upsert({
+      where: { tier: plan.tier },
+      update: {
+        name: plan.name,
+        monthlyPriceUsd: plan.monthlyPriceUsd,
+        activeListingsLimit: plan.activeListingsLimit,
+      },
+      create: {
+        id: randomUUID(),
+        tier: plan.tier,
+        name: plan.name,
+        monthlyPriceUsd: plan.monthlyPriceUsd,
+        activeListingsLimit: plan.activeListingsLimit,
+      },
+    });
+  }
+
   const admin1 = await prisma.user.upsert({
     where: { email: 'admin1@example.com' },
-    update: {},
+    update: { planId: plansByTier.STARTER.id },
     create: {
       id: randomUUID(),
       email: 'admin1@example.com',
@@ -32,12 +58,13 @@ async function main() {
       name: 'Ada Realty',
       ...splitName('Ada Realty'),
       role: 'ADMIN',
+      planId: plansByTier.STARTER.id,
     },
   });
 
   const admin2 = await prisma.user.upsert({
     where: { email: 'admin2@example.com' },
-    update: {},
+    update: { planId: plansByTier.PROFESSIONAL.id },
     create: {
       id: randomUUID(),
       email: 'admin2@example.com',
@@ -45,6 +72,7 @@ async function main() {
       name: 'Bruno Properties',
       ...splitName('Bruno Properties'),
       role: 'ADMIN',
+      planId: plansByTier.PROFESSIONAL.id,
     },
   });
 

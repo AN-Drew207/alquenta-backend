@@ -7,5 +7,7 @@ export abstract class PropertyRepository {
   abstract findById(id: string): Promise<Property | null>;
   abstract findMany(filters: PropertyFilters): Promise<Property[]>;
   abstract countByAdminId(adminId: string): Promise<number>;
+  abstract countActiveByAdminId(adminId: string): Promise<number>;
+  abstract findCancelledBefore(cutoff: Date): Promise<Property[]>;
   abstract delete(id: string): Promise<void>;
 }

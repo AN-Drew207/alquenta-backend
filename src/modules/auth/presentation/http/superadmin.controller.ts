@@ -44,7 +44,7 @@ export class SuperadminController {
     @Body() dto: InviteAdminRequestDto,
   ): Promise<InviteAdminResponseDto> {
     const inviteUrl = await this.inviteAdminUseCase.execute(
-      new InviteAdminCommand(dto.email),
+      new InviteAdminCommand(dto.email, dto.planId),
     );
     return { inviteUrl };
   }

@@ -28,6 +28,7 @@ export class PropertyMapper {
       images: row.images,
       videos: row.videos,
       whatsapp: row.whatsapp,
+      cancelledAt: row.cancelledAt,
       createdAt: row.createdAt,
     });
   }
@@ -52,6 +53,7 @@ export class PropertyMapper {
       images: property.images,
       videos: property.videos,
       whatsapp: property.whatsapp,
+      cancelledAt: property.cancelledAt,
       createdAt: property.createdAt,
     };
   }

@@ -43,6 +43,7 @@ export class Property {
     private _images: string[],
     private _videos: string[],
     private _whatsapp: string | null,
+    private _cancelledAt: Date | null,
     private readonly _createdAt: Date,
   ) {}
 
@@ -86,6 +87,7 @@ export class Property {
       params.images ?? [],
       params.videos ?? [],
       params.whatsapp ?? null,
+      null,
       new Date(),
     );
   }
@@ -109,6 +111,7 @@ export class Property {
     images: string[];
     videos: string[];
     whatsapp: string | null;
+    cancelledAt: Date | null;
     createdAt: Date;
   }): Property {
     return new Property(
@@ -130,6 +133,7 @@ export class Property {
       params.images,
       params.videos,
       params.whatsapp,
+      params.cancelledAt,
       params.createdAt,
     );
   }
@@ -152,7 +156,14 @@ export class Property {
     if (changes.municipality !== undefined) this._municipality = changes.municipality;
     if (changes.type !== undefined) this._type = changes.type;
     if (changes.operationType !== undefined) this._operationType = changes.operationType;
-    if (changes.status !== undefined) this._status = changes.status;
+    if (changes.status !== undefined) {
+      if (changes.status === PropertyStatus.CANCELLED) {
+        if (this._status !== PropertyStatus.CANCELLED) this._cancelledAt = new Date();
+      } else {
+        this._cancelledAt = null;
+      }
+      this._status = changes.status;
+    }
     if (changes.bedrooms !== undefined) this._bedrooms = changes.bedrooms;
     if (changes.bathrooms !== undefined) this._bathrooms = changes.bathrooms;
     if (changes.parkingSpaces !== undefined) this._parkingSpaces = changes.parkingSpaces;
@@ -232,6 +243,10 @@ export class Property {
 
   get whatsapp(): string | null {
     return this._whatsapp;
+  }
+
+  get cancelledAt(): Date | null {
+    return this._cancelledAt;
   }
 
   get createdAt(): Date {

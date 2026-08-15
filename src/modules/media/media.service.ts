@@ -1,7 +1,11 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
 import { MediaSignatureResponseDto } from './dto/media-signature-response.dto';
+
+// Property uploads are never transformed, so the URL always looks like
+// .../upload/v<version>/<public_id>.<ext> — no transformation segment to skip.
+const PUBLIC_ID_PATTERN = /\/upload\/v\d+\/(.+)\.[a-zA-Z0-9]+$/;
 
 const MAX_FILE_SIZE_BYTES: Record<'image' | 'video', number> = {
   image: 5 * 1024 * 1024,
@@ -15,6 +19,8 @@ const UPLOAD_FOLDERS: Record<'property' | 'avatar', string> = {
 
 @Injectable()
 export class MediaService {
+  private readonly logger = new Logger(MediaService.name);
+
   constructor(private readonly configService: ConfigService) {}
 
   createUploadSignature(
@@ -54,5 +60,32 @@ export class MediaService {
       resourceType,
       transformation: target === 'avatar' ? 'c_fill,g_face,w_800,h_800' : undefined,
     };
+  }
+
+  /**
+   * Best-effort Cloudinary cleanup — logs and swallows failures so a
+   * Cloudinary outage never blocks deleting the underlying record.
+   */
+  async deleteAssets(urls: string[], resourceType: 'image' | 'video'): Promise<void> {
+    if (urls.length === 0) return;
+
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+    if (!cloudName || !apiKey || !apiSecret) return;
+
+    const publicIds = urls
+      .map((url) => url.match(PUBLIC_ID_PATTERN)?.[1])
+      .filter((id): id is string => !!id);
+    if (publicIds.length === 0) return;
+
+    try {
+      cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+      await cloudinary.api.delete_resources(publicIds, { resource_type: resourceType });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to delete ${publicIds.length} Cloudinary ${resourceType}(s): ${(error as Error).message}`,
+      );
+    }
   }
 }

@@ -76,6 +76,7 @@ export class User {
     private _username: string | null,
     private readonly _role: Role,
     private _accountType: AccountType,
+    private readonly _planId: string | null,
     private _avatarUrl: string | null,
     private _bio: string | null,
     private _city: string | null,
@@ -92,6 +93,7 @@ export class User {
     private _generalPrefs: GeneralPrefs,
     private _twoFactorEnabled: boolean,
     private _deactivatedAt: Date | null,
+    private _deactivatedBySuperadmin: boolean,
     private readonly _createdAt: Date,
   ) {}
 
@@ -101,6 +103,7 @@ export class User {
     name: string;
     role: Role;
     phone?: string | null;
+    planId?: string | null;
   }): User {
     const { firstName, lastName } = splitName(params.name);
     return new User(
@@ -114,7 +117,8 @@ export class User {
       lastName,
       null,
       params.role,
-      params.role === Role.ADMIN ? AccountType.OWNER : AccountType.CLIENT,
+      params.role === Role.ADMIN ? AccountType.AGENCY : AccountType.CLIENT,
+      params.planId ?? null,
       null,
       null,
       null,
@@ -131,6 +135,7 @@ export class User {
       DEFAULT_GENERAL_PREFS,
       false,
       null,
+      false,
       new Date(),
     );
   }
@@ -147,6 +152,7 @@ export class User {
     username: string | null;
     role: Role;
     accountType: AccountType;
+    planId: string | null;
     avatarUrl: string | null;
     bio: string | null;
     city: string | null;
@@ -163,6 +169,7 @@ export class User {
     generalPrefs: GeneralPrefs | null;
     twoFactorEnabled: boolean;
     deactivatedAt: Date | null;
+    deactivatedBySuperadmin: boolean;
     createdAt: Date;
   }): User {
     return new User(
@@ -177,6 +184,7 @@ export class User {
       params.username,
       params.role,
       params.accountType,
+      params.planId,
       params.avatarUrl,
       params.bio,
       params.city,
@@ -193,6 +201,7 @@ export class User {
       params.generalPrefs ?? DEFAULT_GENERAL_PREFS,
       params.twoFactorEnabled,
       params.deactivatedAt,
+      params.deactivatedBySuperadmin,
       params.createdAt,
     );
   }
@@ -239,10 +248,6 @@ export class User {
     this._emailVerified = true;
   }
 
-  markEmailVerified(): void {
-    this._emailVerified = true;
-  }
-
   markPhoneVerified(): void {
     this._phoneVerified = true;
   }
@@ -251,12 +256,14 @@ export class User {
     this._passwordHash = passwordHash;
   }
 
-  deactivate(): void {
+  deactivate(bySuperadmin = false): void {
     this._deactivatedAt = new Date();
+    this._deactivatedBySuperadmin = bySuperadmin;
   }
 
   reactivate(): void {
     this._deactivatedAt = null;
+    this._deactivatedBySuperadmin = false;
   }
 
   get id(): string {
@@ -301,6 +308,10 @@ export class User {
 
   get accountType(): AccountType {
     return this._accountType;
+  }
+
+  get planId(): string | null {
+    return this._planId;
   }
 
   get avatarUrl(): string | null {
@@ -367,6 +378,10 @@ export class User {
     return this._deactivatedAt;
   }
 
+  get deactivatedBySuperadmin(): boolean {
+    return this._deactivatedBySuperadmin;
+  }
+
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -390,9 +405,8 @@ export class User {
         met: !!this._bio && this._bio.trim().length >= 30,
       },
       { key: 'phone', weight: 15, met: !!this._phone },
-      { key: 'username', weight: 10, met: !!this._username },
-      { key: 'location', weight: 10, met: !!this._city && !!this._state },
-      { key: 'email', weight: 10, met: this._emailVerified === true },
+      { key: 'username', weight: 15, met: !!this._username },
+      { key: 'location', weight: 15, met: !!this._city && !!this._state },
     ];
 
     let pct = 0;

@@ -11,6 +11,7 @@ import { AcceptAdminInvitationCommand } from './accept-admin-invitation.command'
 
 interface AdminInviteTokenPayload {
   email: string;
+  planId: string;
   purpose: string;
 }
 
@@ -50,6 +51,7 @@ export class AcceptAdminInvitationUseCase
       passwordHash,
       name: command.name,
       role: Role.ADMIN,
+      planId: payload.planId,
     });
 
     await this.userRepository.save(user);

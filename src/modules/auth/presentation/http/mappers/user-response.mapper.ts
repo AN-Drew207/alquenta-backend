@@ -36,6 +36,7 @@ export class UserResponseMapper {
       username: user.username,
       role: user.role,
       accountType: user.accountType,
+      plan: null,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
       city: user.city,
@@ -59,6 +60,7 @@ export class UserResponseMapper {
       email: user.email,
       name: user.name,
       phone: user.phone,
+      planId: user.planId,
       createdAt: user.createdAt,
       deactivatedAt: user.deactivatedAt,
     };

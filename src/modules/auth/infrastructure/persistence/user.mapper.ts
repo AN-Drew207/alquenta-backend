@@ -25,6 +25,7 @@ export class UserMapper {
       username: row.username,
       role: row.role as Role,
       accountType: row.accountType as AccountType,
+      planId: row.planId,
       avatarUrl: row.avatarUrl,
       bio: row.bio,
       city: row.city,
@@ -42,6 +43,7 @@ export class UserMapper {
       generalPrefs: row.generalPrefs as unknown as GeneralPrefs | null,
       twoFactorEnabled: row.twoFactorEnabled,
       deactivatedAt: row.deactivatedAt,
+      deactivatedBySuperadmin: row.deactivatedBySuperadmin,
       createdAt: row.createdAt,
     });
   }
@@ -59,6 +61,7 @@ export class UserMapper {
       username: user.username,
       role: user.role,
       accountType: user.accountType,
+      planId: user.planId,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
       city: user.city,
@@ -76,6 +79,7 @@ export class UserMapper {
       generalPrefs: user.generalPrefs as unknown as Prisma.InputJsonValue,
       twoFactorEnabled: user.twoFactorEnabled,
       deactivatedAt: user.deactivatedAt,
+      deactivatedBySuperadmin: user.deactivatedBySuperadmin,
       createdAt: user.createdAt,
     };
   }

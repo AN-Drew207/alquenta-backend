@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../../../../shared/domain/role.enum';
 import { AccountType } from '../../../domain/enums/account-type.enum';
 import type { GeneralPrefs } from '../../../domain/entities/user-preferences';
+import { PlanResponseDto } from '../../../../plans/presentation/http/dto/plan-response.dto';
 
 export class ProfileCompletionDto {
   @ApiProperty()
@@ -44,6 +45,14 @@ export class ProfileResponseDto {
 
   @ApiProperty({ enum: AccountType })
   accountType: AccountType;
+
+  @ApiProperty({
+    type: PlanResponseDto,
+    required: false,
+    nullable: true,
+    description: 'The subscription plan assigned to this account (ADMIN only, otherwise null)',
+  })
+  plan: PlanResponseDto | null;
 
   @ApiProperty({ required: false, nullable: true })
   avatarUrl: string | null;

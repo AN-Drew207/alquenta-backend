@@ -3,6 +3,7 @@ import { Prisma } from '../../../../../generated/prisma/client';
 import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
 import { TransactionContext } from '../../../../shared/domain/transaction/transaction-context';
 import { Property } from '../../domain/entities/property.entity';
+import { PropertyStatus } from '../../domain/enums/property-status.enum';
 import { PropertyRepository } from '../../domain/repositories/property.repository';
 import { PropertyFilters } from '../../domain/repositories/property-filters.interface';
 import { PropertyMapper } from './property.mapper';
@@ -57,6 +58,22 @@ export class PrismaPropertyRepository implements PropertyRepository {
 
   async countByAdminId(adminId: string): Promise<number> {
     return this.prisma.property.count({ where: { adminId } });
+  }
+
+  async countActiveByAdminId(adminId: string): Promise<number> {
+    return this.prisma.property.count({
+      where: { adminId, status: PropertyStatus.AVAILABLE },
+    });
+  }
+
+  async findCancelledBefore(cutoff: Date): Promise<Property[]> {
+    const rows = await this.prisma.property.findMany({
+      where: {
+        status: PropertyStatus.CANCELLED,
+        cancelledAt: { lt: cutoff },
+      },
+    });
+    return rows.map(PropertyMapper.toDomain);
   }
 
   async delete(id: string): Promise<void> {

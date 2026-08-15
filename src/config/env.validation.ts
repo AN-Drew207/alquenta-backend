@@ -8,7 +8,23 @@ import {
   validateSync,
 } from 'class-validator';
 
+/**
+ * Fill this in with the production Neon host once you have it at hand,
+ * e.g. 'ep-xxxx-pooler.c-4.us-east-2.aws.neon.tech' (just the host, no
+ * credentials). Left blank on purpose — see assertNotPointingAtProdDb
+ * below. While blank, that safeguard is a no-op.
+ */
+const PRODUCTION_DB_HOST: string = '';
+
 class EnvironmentVariables {
+  /**
+   * Which deployment tier this process is running as — distinct from
+   * NODE_ENV, which only controls Node/framework runtime optimizations.
+   * Render sets this per service (production vs -dev).
+   */
+  @IsIn(['development', 'production', 'test'])
+  APP_ENV: string;
+
   @IsIn(['development', 'production', 'test'])
   @IsOptional()
   NODE_ENV?: string;
@@ -52,17 +68,55 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   CLOUDINARY_API_SECRET?: string;
+
+  /**
+   * Folder prefix uploads are stored under (e.g. "alquenta/dev" vs
+   * "alquenta/prod"), so environments never mix each other's media even
+   * when they share the same Cloudinary account. Defaults to "alquenta".
+   */
+  @IsString()
+  @IsOptional()
+  CLOUDINARY_FOLDER_PREFIX?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
   const validatedConfig = plainToInstance(EnvironmentVariables, config, {
     enableImplicitConversion: true,
   });
-  const errors = validateSync(validatedConfig, { skipMissingProperties: false });
+  const errors = validateSync(validatedConfig, {
+    skipMissingProperties: false,
+  });
 
   if (errors.length > 0) {
-    throw new Error(`Variables de entorno inválidas: ${errors.toString()}`);
+    const details = errors
+      .map(
+        (error) =>
+          `  - ${error.property}: ${Object.values(error.constraints ?? {}).join(', ')}`,
+      )
+      .join('\n');
+    throw new Error(`Invalid environment variables:\n${details}`);
   }
 
+  assertNotPointingAtProductionDatabase(validatedConfig);
+
   return validatedConfig;
+}
+
+/**
+ * Refuses to boot a non-production process against the production
+ * database — the most common way to accidentally wreck real data from a
+ * dev/test environment. No-op until PRODUCTION_DB_HOST is filled in above.
+ */
+function assertNotPointingAtProductionDatabase(
+  config: EnvironmentVariables,
+): void {
+  if (config.APP_ENV === 'production' || !PRODUCTION_DB_HOST) return;
+
+  if (config.DATABASE_URL.includes(PRODUCTION_DB_HOST)) {
+    throw new Error(
+      `Refusing to start: APP_ENV is "${config.APP_ENV}" but DATABASE_URL points ` +
+        `at the production database host (${PRODUCTION_DB_HOST}). Double-check which ` +
+        'connection string was set for this environment.',
+    );
+  }
 }

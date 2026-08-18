@@ -15,6 +15,9 @@ import { ConversationRepository } from '../../../domain/repositories/conversatio
 import { MessageRepository } from '../../../domain/repositories/message.repository';
 import { PropertyNotAvailableException } from '../../../domain/exceptions/property-not-available.exception';
 import { CannotMessageOwnPropertyException } from '../../../domain/exceptions/cannot-message-own-property.exception';
+import { RecordAnalyticsEventUseCase } from '../../../../analytics/application/use-cases/record-analytics-event/record-analytics-event.use-case';
+import { RecordAnalyticsEventCommand } from '../../../../analytics/application/use-cases/record-analytics-event/record-analytics-event.command';
+import { PropertyAnalyticsEventType } from '../../../../analytics/domain/enums/property-analytics-event-type.enum';
 import { StartConversationCommand } from './start-conversation.command';
 
 export interface StartConversationResult {
@@ -23,9 +26,10 @@ export interface StartConversationResult {
 }
 
 @Injectable()
-export class StartConversationUseCase
-  implements UseCase<StartConversationCommand, StartConversationResult>
-{
+export class StartConversationUseCase implements UseCase<
+  StartConversationCommand,
+  StartConversationResult
+> {
   private readonly logger = new Logger(StartConversationUseCase.name);
 
   constructor(
@@ -35,15 +39,14 @@ export class StartConversationUseCase
     private readonly userRepository: UserRepository,
     private readonly notificationRepository: NotificationRepository,
     private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
+    private readonly recordAnalyticsEventUseCase: RecordAnalyticsEventUseCase,
     private readonly unitOfWork: UnitOfWork,
   ) {}
 
   async execute(
     command: StartConversationCommand,
   ): Promise<StartConversationResult> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }
@@ -90,6 +93,13 @@ export class StartConversationUseCase
       });
       await this.notificationRepository.save(notification, ctx);
     });
+
+    await this.recordAnalyticsEventUseCase.execute(
+      new RecordAnalyticsEventCommand(
+        property.id,
+        PropertyAnalyticsEventType.MESSAGE_STARTED,
+      ),
+    );
 
     try {
       await this.sendNotificationEmailUseCase.execute(notification!);

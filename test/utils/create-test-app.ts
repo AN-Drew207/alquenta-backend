@@ -9,13 +9,45 @@ import { AppModule } from '../../src/app.module';
 import { DomainExceptionFilter } from '../../src/shared/presentation/filters/domain-exception.filter';
 import { PrismaService } from '../../src/shared/infrastructure/prisma/prisma.service';
 import { splitName } from '../../src/modules/auth/domain/entities/split-name';
+import { PlanTier } from '../../src/modules/plans/domain/enums/plan-tier.enum';
+
+/**
+ * Mirrors prisma/seed.ts's plan catalog — CI's ephemeral Postgres never
+ * runs `prisma db seed`, so tests that need a plan assigned upsert it
+ * themselves here, by tier.
+ */
+const PLAN_DEFAULTS: Record<
+  PlanTier,
+  { name: string; monthlyPriceUsd: number; activeListingsLimit: number | null }
+> = {
+  [PlanTier.STARTER]: {
+    name: 'Starter',
+    monthlyPriceUsd: 15,
+    activeListingsLimit: 10,
+  },
+  [PlanTier.PROFESSIONAL]: {
+    name: 'Professional',
+    monthlyPriceUsd: 30,
+    activeListingsLimit: 22,
+  },
+  [PlanTier.BUSINESS]: {
+    name: 'Business',
+    monthlyPriceUsd: 50,
+    activeListingsLimit: 45,
+  },
+  [PlanTier.ENTERPRISE]: {
+    name: 'Enterprise',
+    monthlyPriceUsd: 100,
+    activeListingsLimit: null,
+  },
+};
 
 export async function createTestApp(): Promise<INestApplication<App>> {
   const moduleFixture = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
 
-  const app = moduleFixture.createNestApplication();
+  const app = moduleFixture.createNestApplication<INestApplication<App>>();
   app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.useGlobalPipes(
@@ -48,12 +80,32 @@ export function extractCookie(
 /**
  * ADMIN accounts have no public registration endpoint (they are onboarded
  * manually) — this seeds one directly through Prisma for test setup.
+ *
+ * `tier` is optional and defaults to no plan assigned (`planId: null`) —
+ * that's the behavior every pre-existing e2e spec already relies on, so
+ * omitting it keeps them passing unmodified. Pass a tier for tests that
+ * need an admin with an assigned subscription plan (e.g. analytics access).
  */
 export async function seedAdmin(
   prisma: PrismaService,
-  params: { email: string; password: string; name: string },
+  params: { email: string; password: string; name: string; tier?: PlanTier },
 ): Promise<void> {
   const { firstName, lastName } = splitName(params.name);
+
+  let planId: string | null = null;
+  if (params.tier) {
+    const plan = await prisma.plan.upsert({
+      where: { tier: params.tier },
+      update: {},
+      create: {
+        id: randomUUID(),
+        tier: params.tier,
+        ...PLAN_DEFAULTS[params.tier],
+      },
+    });
+    planId = plan.id;
+  }
+
   await prisma.user.create({
     data: {
       id: randomUUID(),
@@ -63,6 +115,7 @@ export async function seedAdmin(
       firstName,
       lastName,
       role: 'ADMIN',
+      planId,
     },
   });
 }

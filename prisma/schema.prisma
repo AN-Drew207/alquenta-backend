@@ -70,6 +70,18 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum PropertyAnalyticsEventType {
+  VIEW
+  WHATSAPP_REVEAL
+  MESSAGE_STARTED
+}
+
+enum DeviceType {
+  MOBILE
+  DESKTOP
+  UNKNOWN
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -153,9 +165,10 @@ model Property {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  conversations Conversation[]
-  favoritedBy   Favorite[]
-  reports       Report[]
+  conversations   Conversation[]
+  favoritedBy     Favorite[]
+  reports         Report[]
+  analyticsEvents PropertyAnalyticsEvent[]
 
   @@index([status, type, state, municipality])
 }
@@ -245,4 +258,15 @@ model Report {
   createdAt  DateTime     @default(now())
 
   @@index([status])
+}
+
+model PropertyAnalyticsEvent {
+  id         String                     @id @default(uuid())
+  propertyId String
+  property   Property                   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  type       PropertyAnalyticsEventType
+  deviceType DeviceType?
+  occurredAt DateTime                   @default(now())
+
+  @@index([propertyId, type, occurredAt])
 }

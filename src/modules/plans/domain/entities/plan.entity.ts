@@ -1,5 +1,13 @@
 import { PlanTier } from '../enums/plan-tier.enum';
 
+/** Ascending order — index comparison backs `meetsMinimumTier()` below. */
+const TIER_ORDER: readonly PlanTier[] = [
+  PlanTier.STARTER,
+  PlanTier.PROFESSIONAL,
+  PlanTier.BUSINESS,
+  PlanTier.ENTERPRISE,
+];
+
 export class Plan {
   private constructor(
     private readonly _id: string,
@@ -32,6 +40,14 @@ export class Plan {
   allowsAnotherActiveListing(currentActiveCount: number): boolean {
     if (this._activeListingsLimit === null) return true;
     return currentActiveCount < this._activeListingsLimit;
+  }
+
+  /**
+   * Generic tier-ordering comparison (not analytics-specific — reusable by
+   * any future feature gated by a minimum plan tier).
+   */
+  meetsMinimumTier(required: PlanTier): boolean {
+    return TIER_ORDER.indexOf(this._tier) >= TIER_ORDER.indexOf(required);
   }
 
   get id(): string {

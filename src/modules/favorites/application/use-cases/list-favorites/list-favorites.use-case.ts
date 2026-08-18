@@ -6,9 +6,10 @@ import { FavoriteRepository } from '../../../domain/repositories/favorite.reposi
 import { ListFavoritesQuery } from './list-favorites.query';
 
 @Injectable()
-export class ListFavoritesUseCase
-  implements UseCase<ListFavoritesQuery, Property[]>
-{
+export class ListFavoritesUseCase implements UseCase<
+  ListFavoritesQuery,
+  Property[]
+> {
   constructor(
     private readonly favoriteRepository: FavoriteRepository,
     private readonly propertyRepository: PropertyRepository,

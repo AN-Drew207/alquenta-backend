@@ -10,7 +10,10 @@ import { NotificationMapper } from './notification.mapper';
 export class PrismaNotificationRepository implements NotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(notification: Notification, ctx?: TransactionContext): Promise<void> {
+  async save(
+    notification: Notification,
+    ctx?: TransactionContext,
+  ): Promise<void> {
     const client = (ctx as Prisma.TransactionClient | undefined) ?? this.prisma;
     const data = NotificationMapper.toPersistence(notification);
     await client.notification.upsert({
@@ -30,6 +33,6 @@ export class PrismaNotificationRepository implements NotificationRepository {
       where: { recipientUserId },
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map(NotificationMapper.toDomain);
+    return rows.map((row) => NotificationMapper.toDomain(row));
   }
 }

@@ -6,9 +6,10 @@ import { MediaService } from '../../../../media/media.service';
 export const CANCELLED_RETENTION_DAYS = 90;
 
 @Injectable()
-export class PurgeStaleCancelledPropertiesUseCase
-  implements UseCase<void, number>
-{
+export class PurgeStaleCancelledPropertiesUseCase implements UseCase<
+  void,
+  number
+> {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly mediaService: MediaService,
@@ -18,7 +19,8 @@ export class PurgeStaleCancelledPropertiesUseCase
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - CANCELLED_RETENTION_DAYS);
 
-    const staleProperties = await this.propertyRepository.findCancelledBefore(cutoff);
+    const staleProperties =
+      await this.propertyRepository.findCancelledBefore(cutoff);
 
     for (const property of staleProperties) {
       await this.propertyRepository.delete(property.id);

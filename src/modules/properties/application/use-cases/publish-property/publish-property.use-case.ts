@@ -8,9 +8,10 @@ import { PlanRepository } from '../../../../plans/domain/repositories/plan.repos
 import { PublishPropertyCommand } from './publish-property.command';
 
 @Injectable()
-export class PublishPropertyUseCase
-  implements UseCase<PublishPropertyCommand, Property>
-{
+export class PublishPropertyUseCase implements UseCase<
+  PublishPropertyCommand,
+  Property
+> {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly userRepository: UserRepository,
@@ -45,14 +46,17 @@ export class PublishPropertyUseCase
     return property;
   }
 
-  private async assertWithinActiveListingsLimit(adminId: string): Promise<void> {
+  private async assertWithinActiveListingsLimit(
+    adminId: string,
+  ): Promise<void> {
     const admin = await this.userRepository.findById(adminId);
     if (!admin?.planId) return;
 
     const plan = await this.planRepository.findById(admin.planId);
     if (!plan) return;
 
-    const activeCount = await this.propertyRepository.countActiveByAdminId(adminId);
+    const activeCount =
+      await this.propertyRepository.countActiveByAdminId(adminId);
     if (!plan.allowsAnotherActiveListing(activeCount)) {
       throw new ActiveListingsLimitExceededException(
         plan.name,

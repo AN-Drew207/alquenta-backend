@@ -4,9 +4,10 @@ import { Conversation } from '../../../domain/entities/conversation.entity';
 import { ConversationRepository } from '../../../domain/repositories/conversation.repository';
 
 @Injectable()
-export class ListMyConversationsUseCase
-  implements UseCase<string, Conversation[]>
-{
+export class ListMyConversationsUseCase implements UseCase<
+  string,
+  Conversation[]
+> {
   constructor(
     private readonly conversationRepository: ConversationRepository,
   ) {}

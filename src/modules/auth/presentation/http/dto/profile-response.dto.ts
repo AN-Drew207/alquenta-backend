@@ -50,7 +50,8 @@ export class ProfileResponseDto {
     type: PlanResponseDto,
     required: false,
     nullable: true,
-    description: 'The subscription plan assigned to this account (ADMIN only, otherwise null)',
+    description:
+      'The subscription plan assigned to this account (ADMIN only, otherwise null)',
   })
   plan: PlanResponseDto | null;
 

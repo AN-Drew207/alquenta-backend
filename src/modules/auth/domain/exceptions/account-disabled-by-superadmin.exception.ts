@@ -2,6 +2,8 @@ import { DomainForbiddenException } from '../../../../shared/domain/exceptions/d
 
 export class AccountDisabledBySuperadminException extends DomainForbiddenException {
   constructor() {
-    super('This account was disabled by an administrator. Contact support for help.');
+    super(
+      'This account was disabled by an administrator. Contact support for help.',
+    );
   }
 }

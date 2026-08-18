@@ -43,7 +43,9 @@ export class ProfileController {
 
   private async toProfileDto(user: User): Promise<ProfileResponseDto> {
     const dto = UserResponseMapper.toProfileDto(user);
-    const plan = user.planId ? await this.planRepository.findById(user.planId) : null;
+    const plan = user.planId
+      ? await this.planRepository.findById(user.planId)
+      : null;
     return { ...dto, plan: plan ? PlanResponseMapper.toDto(plan) : null };
   }
 

@@ -9,7 +9,8 @@ export class MediaSignatureRequestDto {
   @ApiProperty({
     enum: ['property', 'avatar'],
     required: false,
-    description: 'What the upload is for — defaults to "property". "avatar" is open to any authenticated user.',
+    description:
+      'What the upload is for — defaults to "property". "avatar" is open to any authenticated user.',
   })
   @IsOptional()
   @IsIn(['property', 'avatar'])

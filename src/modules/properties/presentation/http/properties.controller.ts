@@ -118,9 +118,7 @@ export class PropertiesController {
     const whatsapp = await this.resolveWhatsappUseCase.execute(id);
     return PropertyResponseMapper.toPublicDto(property, {
       hasWhatsappContact: !!whatsapp,
-      revealToken: whatsapp
-        ? this.contactRevealTokenService.issue(id)
-        : null,
+      revealToken: whatsapp ? this.contactRevealTokenService.issue(id) : null,
     });
   }
 

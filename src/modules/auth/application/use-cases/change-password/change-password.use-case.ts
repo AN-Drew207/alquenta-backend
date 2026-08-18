@@ -7,7 +7,10 @@ import { InvalidCredentialsException } from '../../../domain/exceptions/invalid-
 import { ChangePasswordCommand } from './change-password.command';
 
 @Injectable()
-export class ChangePasswordUseCase implements UseCase<ChangePasswordCommand, void> {
+export class ChangePasswordUseCase implements UseCase<
+  ChangePasswordCommand,
+  void
+> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,

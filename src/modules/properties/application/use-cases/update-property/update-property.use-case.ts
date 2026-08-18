@@ -7,15 +7,14 @@ import { PropertyNotOwnedByAdminException } from '../../../domain/exceptions/pro
 import { UpdatePropertyCommand } from './update-property.command';
 
 @Injectable()
-export class UpdatePropertyUseCase
-  implements UseCase<UpdatePropertyCommand, Property>
-{
+export class UpdatePropertyUseCase implements UseCase<
+  UpdatePropertyCommand,
+  Property
+> {
   constructor(private readonly propertyRepository: PropertyRepository) {}
 
   async execute(command: UpdatePropertyCommand): Promise<Property> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }

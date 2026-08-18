@@ -35,7 +35,9 @@ export class PropertyMapper {
     });
   }
 
-  static toPersistence(property: Property): Prisma.PropertyUncheckedCreateInput {
+  static toPersistence(
+    property: Property,
+  ): Prisma.PropertyUncheckedCreateInput {
     return {
       id: property.id,
       adminId: property.adminId,

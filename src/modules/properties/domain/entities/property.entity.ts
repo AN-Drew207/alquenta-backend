@@ -166,15 +166,19 @@ export class Property {
       this._price = changes.price;
     }
     if (changes.title !== undefined) this._title = changes.title;
-    if (changes.description !== undefined) this._description = changes.description;
+    if (changes.description !== undefined)
+      this._description = changes.description;
     if (changes.address !== undefined) this._address = changes.address;
     if (changes.state !== undefined) this._state = changes.state;
-    if (changes.municipality !== undefined) this._municipality = changes.municipality;
+    if (changes.municipality !== undefined)
+      this._municipality = changes.municipality;
     if (changes.type !== undefined) this._type = changes.type;
-    if (changes.operationType !== undefined) this._operationType = changes.operationType;
+    if (changes.operationType !== undefined)
+      this._operationType = changes.operationType;
     if (changes.status !== undefined) {
       if (changes.status === PropertyStatus.CANCELLED) {
-        if (this._status !== PropertyStatus.CANCELLED) this._cancelledAt = new Date();
+        if (this._status !== PropertyStatus.CANCELLED)
+          this._cancelledAt = new Date();
       } else {
         this._cancelledAt = null;
       }
@@ -182,8 +186,10 @@ export class Property {
     }
     if (changes.bedrooms !== undefined) this._bedrooms = changes.bedrooms;
     if (changes.bathrooms !== undefined) this._bathrooms = changes.bathrooms;
-    if (changes.parkingSpaces !== undefined) this._parkingSpaces = changes.parkingSpaces;
-    if (changes.squareMeters !== undefined) this._squareMeters = changes.squareMeters;
+    if (changes.parkingSpaces !== undefined)
+      this._parkingSpaces = changes.parkingSpaces;
+    if (changes.squareMeters !== undefined)
+      this._squareMeters = changes.squareMeters;
     if (changes.images !== undefined) this._images = changes.images;
     if (changes.videos !== undefined) this._videos = changes.videos;
     if (changes.whatsapp !== undefined) this._whatsapp = changes.whatsapp;

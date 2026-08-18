@@ -23,6 +23,6 @@ export class PrismaPlanRepository implements PlanRepository {
     const rows = await this.prisma.plan.findMany({
       orderBy: { monthlyPriceUsd: 'asc' },
     });
-    return rows.map(PlanMapper.toDomain);
+    return rows.map((row) => PlanMapper.toDomain(row));
   }
 }

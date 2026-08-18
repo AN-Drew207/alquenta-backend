@@ -4,9 +4,10 @@ import { FavoriteRepository } from '../../../domain/repositories/favorite.reposi
 import { RemoveFavoriteCommand } from './remove-favorite.command';
 
 @Injectable()
-export class RemoveFavoriteUseCase
-  implements UseCase<RemoveFavoriteCommand, void>
-{
+export class RemoveFavoriteUseCase implements UseCase<
+  RemoveFavoriteCommand,
+  void
+> {
   constructor(private readonly favoriteRepository: FavoriteRepository) {}
 
   async execute(command: RemoveFavoriteCommand): Promise<void> {

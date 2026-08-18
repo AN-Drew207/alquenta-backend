@@ -32,7 +32,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
     const rows = await this.prisma.property.findMany({
       where: { id: { in: ids } },
     });
-    return rows.map(PropertyMapper.toDomain);
+    return rows.map((row) => PropertyMapper.toDomain(row));
   }
 
   async findMany(filters: PropertyFilters): Promise<Property[]> {
@@ -53,8 +53,12 @@ export class PrismaPropertyRepository implements PropertyRepository {
             ...(filters.maxPrice !== undefined && { lte: filters.maxPrice }),
           },
         }),
-        ...(filters.bedrooms !== undefined && { bedrooms: { gte: filters.bedrooms } }),
-        ...(filters.bathrooms !== undefined && { bathrooms: { gte: filters.bathrooms } }),
+        ...(filters.bedrooms !== undefined && {
+          bedrooms: { gte: filters.bedrooms },
+        }),
+        ...(filters.bathrooms !== undefined && {
+          bathrooms: { gte: filters.bathrooms },
+        }),
         ...(filters.parkingSpaces !== undefined && {
           parkingSpaces: { gte: filters.parkingSpaces },
         }),
@@ -66,7 +70,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
         [filters.sortBy ?? 'createdAt']: filters.sortOrder ?? 'desc',
       },
     });
-    return rows.map(PropertyMapper.toDomain);
+    return rows.map((row) => PropertyMapper.toDomain(row));
   }
 
   async countByAdminId(adminId: string): Promise<number> {
@@ -86,7 +90,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
         cancelledAt: { lt: cutoff },
       },
     });
-    return rows.map(PropertyMapper.toDomain);
+    return rows.map((row) => PropertyMapper.toDomain(row));
   }
 
   async delete(id: string): Promise<void> {

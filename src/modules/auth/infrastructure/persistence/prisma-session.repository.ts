@@ -35,14 +35,17 @@ export class PrismaSessionRepository implements SessionRepository {
       where: { userId },
       orderBy: { lastActiveAt: 'desc' },
     });
-    return rows.map(SessionMapper.toDomain);
+    return rows.map((row) => SessionMapper.toDomain(row));
   }
 
   async delete(id: string): Promise<void> {
     await this.prisma.session.deleteMany({ where: { id } });
   }
 
-  async deleteAllForUserExcept(userId: string, exceptId: string): Promise<void> {
+  async deleteAllForUserExcept(
+    userId: string,
+    exceptId: string,
+  ): Promise<void> {
     await this.prisma.session.deleteMany({
       where: { userId, NOT: { id: exceptId } },
     });

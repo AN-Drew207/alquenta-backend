@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../../shared/presentation/decorators/roles.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
@@ -49,7 +58,7 @@ export class ReportsController {
     const items = await this.listReportsUseCase.execute(
       new ListReportsQuery(query.status),
     );
-    return items.map(ReportResponseMapper.toDto);
+    return items.map((item) => ReportResponseMapper.toDto(item));
   }
 
   @ApiOperation({

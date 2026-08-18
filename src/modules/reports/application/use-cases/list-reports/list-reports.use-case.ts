@@ -7,9 +7,10 @@ import { ListReportsQuery } from './list-reports.query';
 import { ReportListItem } from './report-list-item';
 
 @Injectable()
-export class ListReportsUseCase
-  implements UseCase<ListReportsQuery, ReportListItem[]>
-{
+export class ListReportsUseCase implements UseCase<
+  ListReportsQuery,
+  ReportListItem[]
+> {
   constructor(
     private readonly reportRepository: ReportRepository,
     private readonly propertyRepository: PropertyRepository,
@@ -34,9 +35,7 @@ export class ListReportsUseCase
       uniqueReporterIds.map((id) => this.userRepository.findById(id)),
     );
     const reportersById = new Map(
-      reporters
-        .filter((user) => user !== null)
-        .map((user) => [user.id, user]),
+      reporters.filter((user) => user !== null).map((user) => [user.id, user]),
     );
 
     return reports

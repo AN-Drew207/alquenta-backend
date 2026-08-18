@@ -94,7 +94,8 @@ export class CreatePropertyRequestDto {
 
   @ApiProperty({
     required: false,
-    description: 'WhatsApp number for this listing specifically (overrides the profile default)',
+    description:
+      'WhatsApp number for this listing specifically (overrides the profile default)',
   })
   @IsOptional()
   @IsString()
@@ -110,7 +111,8 @@ export class CreatePropertyRequestDto {
 
   @ApiProperty({
     required: false,
-    description: 'Longitude of the pin the admin placed on the location picker.',
+    description:
+      'Longitude of the pin the admin placed on the location picker.',
   })
   @IsOptional()
   @IsLongitude()

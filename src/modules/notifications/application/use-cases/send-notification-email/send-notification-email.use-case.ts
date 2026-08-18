@@ -5,9 +5,10 @@ import { Notification } from '../../../domain/entities/notification.entity';
 import { EmailSender } from '../../../../../shared/domain/ports/email-sender';
 
 @Injectable()
-export class SendNotificationEmailUseCase
-  implements UseCase<Notification, void>
-{
+export class SendNotificationEmailUseCase implements UseCase<
+  Notification,
+  void
+> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailSender: EmailSender,

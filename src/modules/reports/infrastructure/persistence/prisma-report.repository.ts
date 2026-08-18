@@ -28,6 +28,6 @@ export class PrismaReportRepository implements ReportRepository {
       where: status ? { status } : undefined,
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map(ReportMapper.toDomain);
+    return rows.map((row) => ReportMapper.toDomain(row));
   }
 }

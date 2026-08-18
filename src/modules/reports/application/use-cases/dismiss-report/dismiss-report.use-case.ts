@@ -5,9 +5,10 @@ import { ReportRepository } from '../../../domain/repositories/report.repository
 import { DismissReportCommand } from './dismiss-report.command';
 
 @Injectable()
-export class DismissReportUseCase
-  implements UseCase<DismissReportCommand, void>
-{
+export class DismissReportUseCase implements UseCase<
+  DismissReportCommand,
+  void
+> {
   constructor(private readonly reportRepository: ReportRepository) {}
 
   async execute(command: DismissReportCommand): Promise<void> {

@@ -9,18 +9,17 @@ import { MediaService } from '../../../../media/media.service';
 import { DeletePropertyCommand } from './delete-property.command';
 
 @Injectable()
-export class DeletePropertyUseCase
-  implements UseCase<DeletePropertyCommand, void>
-{
+export class DeletePropertyUseCase implements UseCase<
+  DeletePropertyCommand,
+  void
+> {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly mediaService: MediaService,
   ) {}
 
   async execute(command: DeletePropertyCommand): Promise<void> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }

@@ -7,5 +7,7 @@ export abstract class NotificationRepository {
     ctx?: TransactionContext,
   ): Promise<void>;
   abstract findById(id: string): Promise<Notification | null>;
-  abstract findManyByRecipient(recipientUserId: string): Promise<Notification[]>;
+  abstract findManyByRecipient(
+    recipientUserId: string,
+  ): Promise<Notification[]>;
 }

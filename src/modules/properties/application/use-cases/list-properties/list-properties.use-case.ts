@@ -5,9 +5,10 @@ import { PropertyRepository } from '../../../domain/repositories/property.reposi
 import { PropertyFilters } from '../../../domain/repositories/property-filters.interface';
 
 @Injectable()
-export class ListPropertiesUseCase
-  implements UseCase<PropertyFilters, Property[]>
-{
+export class ListPropertiesUseCase implements UseCase<
+  PropertyFilters,
+  Property[]
+> {
   constructor(private readonly propertyRepository: PropertyRepository) {}
 
   async execute(filters: PropertyFilters): Promise<Property[]> {

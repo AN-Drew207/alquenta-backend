@@ -11,9 +11,10 @@ import { RequestEmailChangeCommand } from './request-email-change.command';
 const TOKEN_EXPIRES_IN = '1h';
 
 @Injectable()
-export class RequestEmailChangeUseCase
-  implements UseCase<RequestEmailChangeCommand, void>
-{
+export class RequestEmailChangeUseCase implements UseCase<
+  RequestEmailChangeCommand,
+  void
+> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,

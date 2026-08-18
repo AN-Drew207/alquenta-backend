@@ -41,7 +41,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { role },
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map(UserMapper.toDomain);
+    return rows.map((row) => UserMapper.toDomain(row));
   }
 
   async delete(id: string): Promise<void> {

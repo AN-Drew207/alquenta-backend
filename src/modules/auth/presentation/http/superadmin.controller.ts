@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../../shared/presentation/decorators/roles.decorator';
 import { Role } from '../../../../shared/domain/role.enum';
@@ -55,7 +64,9 @@ export class SuperadminController {
     return { inviteUrl };
   }
 
-  @ApiOperation({ summary: 'Disable an admin account and sign them out everywhere' })
+  @ApiOperation({
+    summary: 'Disable an admin account and sign them out everywhere',
+  })
   @Patch('admins/:id/disable')
   @HttpCode(200)
   async disableAdmin(@Param('id') id: string): Promise<{ ok: true }> {

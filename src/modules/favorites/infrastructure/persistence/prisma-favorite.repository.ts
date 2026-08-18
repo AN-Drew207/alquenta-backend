@@ -31,6 +31,6 @@ export class PrismaFavoriteRepository implements FavoriteRepository {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map(FavoriteMapper.toDomain);
+    return rows.map((row) => FavoriteMapper.toDomain(row));
   }
 }

@@ -13,8 +13,17 @@ import { GetPropertyAnalyticsSummaryUseCase } from '../../application/use-cases/
 import { GetPropertyAnalyticsSummaryCommand } from '../../application/use-cases/get-property-analytics-summary/get-property-analytics-summary.command';
 import { GetPortfolioAnalyticsSummaryUseCase } from '../../application/use-cases/get-portfolio-analytics-summary/get-portfolio-analytics-summary.use-case';
 import { GetPortfolioAnalyticsSummaryQuery } from '../../application/use-cases/get-portfolio-analytics-summary/get-portfolio-analytics-summary.query';
+import { GetPropertyAnalyticsTrendUseCase } from '../../application/use-cases/get-property-analytics-trend/get-property-analytics-trend.use-case';
+import { GetPropertyAnalyticsTrendCommand } from '../../application/use-cases/get-property-analytics-trend/get-property-analytics-trend.command';
+import { GetPropertyAnalyticsRankingUseCase } from '../../application/use-cases/get-property-analytics-ranking/get-property-analytics-ranking.use-case';
+import { GetPropertyAnalyticsRankingQuery } from '../../application/use-cases/get-property-analytics-ranking/get-property-analytics-ranking.query';
+import { GetPropertyAnalyticsDeviceBreakdownUseCase } from '../../application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.use-case';
+import { GetPropertyAnalyticsDeviceBreakdownCommand } from '../../application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.command';
 import { DeviceTypeParser } from '../../infrastructure/parsing/device-type.parser';
 import { PropertyAnalyticsSummaryResponseDto } from './dto/property-analytics-summary-response.dto';
+import { PropertyAnalyticsTrendPointResponseDto } from './dto/property-analytics-trend-point-response.dto';
+import { PropertyAnalyticsRankingEntryResponseDto } from './dto/property-analytics-ranking-entry-response.dto';
+import { PropertyAnalyticsDeviceBreakdownEntryResponseDto } from './dto/property-analytics-device-breakdown-entry-response.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -23,6 +32,9 @@ export class AnalyticsController {
     private readonly recordPropertyViewUseCase: RecordPropertyViewUseCase,
     private readonly getPropertyAnalyticsSummaryUseCase: GetPropertyAnalyticsSummaryUseCase,
     private readonly getPortfolioAnalyticsSummaryUseCase: GetPortfolioAnalyticsSummaryUseCase,
+    private readonly getPropertyAnalyticsTrendUseCase: GetPropertyAnalyticsTrendUseCase,
+    private readonly getPropertyAnalyticsRankingUseCase: GetPropertyAnalyticsRankingUseCase,
+    private readonly getPropertyAnalyticsDeviceBreakdownUseCase: GetPropertyAnalyticsDeviceBreakdownUseCase,
     private readonly deviceTypeParser: DeviceTypeParser,
   ) {}
 
@@ -70,6 +82,50 @@ export class AnalyticsController {
   ): Promise<PropertyAnalyticsSummaryResponseDto> {
     return this.getPortfolioAnalyticsSummaryUseCase.execute(
       new GetPortfolioAnalyticsSummaryQuery(user.id),
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      "A single property's daily view/contact trend (ADMIN only, must own the property, requires PROFESSIONAL+). Window length depends on the caller's tier: PROFESSIONAL sees the last 30 days, BUSINESS the last 90, ENTERPRISE full history.",
+  })
+  @Roles(Role.ADMIN)
+  @Get('properties/:id/trend')
+  async getPropertyTrend(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<PropertyAnalyticsTrendPointResponseDto[]> {
+    return this.getPropertyAnalyticsTrendUseCase.execute(
+      new GetPropertyAnalyticsTrendCommand(id, user.id),
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      "The authenticated admin's properties ranked by views, each with its own view/contact/conversion numbers (ADMIN only, portfolio-wide, requires PROFESSIONAL+).",
+  })
+  @Roles(Role.ADMIN)
+  @Get('ranking')
+  async getRanking(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<PropertyAnalyticsRankingEntryResponseDto[]> {
+    return this.getPropertyAnalyticsRankingUseCase.execute(
+      new GetPropertyAnalyticsRankingQuery(user.id),
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      "A single property's VIEW-event counts grouped by device type (ADMIN only, must own the property, requires PROFESSIONAL+).",
+  })
+  @Roles(Role.ADMIN)
+  @Get('properties/:id/device-breakdown')
+  async getPropertyDeviceBreakdown(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<PropertyAnalyticsDeviceBreakdownEntryResponseDto[]> {
+    return this.getPropertyAnalyticsDeviceBreakdownUseCase.execute(
+      new GetPropertyAnalyticsDeviceBreakdownCommand(id, user.id),
     );
   }
 }

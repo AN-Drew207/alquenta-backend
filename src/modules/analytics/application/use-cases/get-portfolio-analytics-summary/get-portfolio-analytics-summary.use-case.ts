@@ -27,7 +27,9 @@ export class GetPortfolioAnalyticsSummaryUseCase implements UseCase<
   async execute(
     query: GetPortfolioAnalyticsSummaryQuery,
   ): Promise<PropertyAnalyticsSummary> {
-    await this.assertAnalyticsAccessUseCase.execute(query.adminId);
+    await this.assertAnalyticsAccessUseCase.execute({
+      adminId: query.adminId,
+    });
 
     const properties = await this.propertyRepository.findMany({
       adminId: query.adminId,

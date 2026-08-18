@@ -11,6 +11,9 @@ import { RecordAnalyticsEventUseCase } from './application/use-cases/record-anal
 import { RecordPropertyViewUseCase } from './application/use-cases/record-property-view/record-property-view.use-case';
 import { GetPropertyAnalyticsSummaryUseCase } from './application/use-cases/get-property-analytics-summary/get-property-analytics-summary.use-case';
 import { GetPortfolioAnalyticsSummaryUseCase } from './application/use-cases/get-portfolio-analytics-summary/get-portfolio-analytics-summary.use-case';
+import { GetPropertyAnalyticsTrendUseCase } from './application/use-cases/get-property-analytics-trend/get-property-analytics-trend.use-case';
+import { GetPropertyAnalyticsRankingUseCase } from './application/use-cases/get-property-analytics-ranking/get-property-analytics-ranking.use-case';
+import { GetPropertyAnalyticsDeviceBreakdownUseCase } from './application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.use-case';
 import { AnalyticsController } from './presentation/http/analytics.controller';
 
 @Module({
@@ -34,6 +37,9 @@ import { AnalyticsController } from './presentation/http/analytics.controller';
     RecordPropertyViewUseCase,
     GetPropertyAnalyticsSummaryUseCase,
     GetPortfolioAnalyticsSummaryUseCase,
+    GetPropertyAnalyticsTrendUseCase,
+    GetPropertyAnalyticsRankingUseCase,
+    GetPropertyAnalyticsDeviceBreakdownUseCase,
   ],
   // RecordAnalyticsEventUseCase is the one-line instrumentation hook
   // consumed by properties (reveal-contact) and messaging (start-conversation).

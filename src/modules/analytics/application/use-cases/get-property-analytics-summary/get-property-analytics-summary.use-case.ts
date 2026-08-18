@@ -23,7 +23,9 @@ export class GetPropertyAnalyticsSummaryUseCase implements UseCase<
   async execute(
     command: GetPropertyAnalyticsSummaryCommand,
   ): Promise<PropertyAnalyticsSummary> {
-    await this.assertAnalyticsAccessUseCase.execute(command.adminId);
+    await this.assertAnalyticsAccessUseCase.execute({
+      adminId: command.adminId,
+    });
 
     const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {

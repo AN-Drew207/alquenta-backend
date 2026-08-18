@@ -10,12 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
 import { Roles } from '../../../../shared/presentation/decorators/roles.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import { Role } from '../../../../shared/domain/role.enum';
 import type { AuthenticatedUser } from '../../../../shared/domain/authenticated-user.interface';
-import { UserRepository } from '../../../auth/domain/repositories/user.repository';
 import { PropertyStatus } from '../../domain/enums/property-status.enum';
 import { PublishPropertyUseCase } from '../../application/use-cases/publish-property/publish-property.use-case';
 import { PublishPropertyCommand } from '../../application/use-cases/publish-property/publish-property.command';
@@ -27,10 +27,17 @@ import { ListPropertiesUseCase } from '../../application/use-cases/list-properti
 import { GetPropertyByIdUseCase } from '../../application/use-cases/get-property-by-id/get-property-by-id.use-case';
 import { CancelPropertyUseCase } from '../../application/use-cases/cancel-property/cancel-property.use-case';
 import { CancelPropertyCommand } from '../../application/use-cases/cancel-property/cancel-property.command';
+import { ResolvePropertyWhatsappUseCase } from '../../application/use-cases/resolve-property-whatsapp/resolve-property-whatsapp.use-case';
+import { RevealPropertyContactUseCase } from '../../application/use-cases/reveal-property-contact/reveal-property-contact.use-case';
+import { RevealPropertyContactCommand } from '../../application/use-cases/reveal-property-contact/reveal-property-contact.command';
+import { ContactRevealTokenService } from '../../infrastructure/security/contact-reveal-token.service';
 import { CreatePropertyRequestDto } from './dto/create-property-request.dto';
 import { UpdatePropertyRequestDto } from './dto/update-property-request.dto';
 import { ListPropertiesQueryDto } from './dto/list-properties-query.dto';
+import { RevealContactRequestDto } from './dto/reveal-contact-request.dto';
+import { RevealContactResponseDto } from './dto/reveal-contact-response.dto';
 import { PropertyResponseDto } from './dto/property-response.dto';
+import { PublicPropertyResponseDto } from './dto/public-property-response.dto';
 import { PropertyResponseMapper } from './mappers/property-response.mapper';
 
 @ApiTags('properties')
@@ -43,7 +50,9 @@ export class PropertiesController {
     private readonly listUseCase: ListPropertiesUseCase,
     private readonly getByIdUseCase: GetPropertyByIdUseCase,
     private readonly cancelPropertyUseCase: CancelPropertyUseCase,
-    private readonly userRepository: UserRepository,
+    private readonly resolveWhatsappUseCase: ResolvePropertyWhatsappUseCase,
+    private readonly revealPropertyContactUseCase: RevealPropertyContactUseCase,
+    private readonly contactRevealTokenService: ContactRevealTokenService,
   ) {}
 
   @ApiOperation({
@@ -53,7 +62,7 @@ export class PropertiesController {
   @Get()
   async listPublicCatalog(
     @Query() query: ListPropertiesQueryDto,
-  ): Promise<PropertyResponseDto[]> {
+  ): Promise<PublicPropertyResponseDto[]> {
     const properties = await this.listUseCase.execute({
       status: PropertyStatus.AVAILABLE,
       type: query.type,
@@ -66,8 +75,13 @@ export class PropertiesController {
       bedrooms: query.bedrooms,
       bathrooms: query.bathrooms,
       parkingSpaces: query.parkingSpaces,
+      search: query.search,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
     });
-    return properties.map((property) => PropertyResponseMapper.toDto(property));
+    return properties.map((property) =>
+      PropertyResponseMapper.toPublicDto(property),
+    );
   }
 
   @ApiOperation({
@@ -99,12 +113,32 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Get a single property by id (no auth required)' })
   @Public()
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<PropertyResponseDto> {
+  async getById(@Param('id') id: string): Promise<PublicPropertyResponseDto> {
     const property = await this.getByIdUseCase.execute(id);
-    const admin = await this.userRepository.findById(property.adminId);
-    const contactWhatsapp =
-      property.whatsapp ?? (admin?.showWhatsapp ? admin.phone : null);
-    return PropertyResponseMapper.toDto(property, contactWhatsapp);
+    const whatsapp = await this.resolveWhatsappUseCase.execute(id);
+    return PropertyResponseMapper.toPublicDto(property, {
+      hasWhatsappContact: !!whatsapp,
+      revealToken: whatsapp
+        ? this.contactRevealTokenService.issue(id)
+        : null,
+    });
+  }
+
+  @ApiOperation({
+    summary:
+      "Redeem a property page's short-lived reveal token for the actual WhatsApp number (no auth required, but rate-limited far tighter than the rest of the API — see api/CLAUDE.md's contact-reveal note).",
+  })
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post(':id/reveal-contact')
+  async revealContact(
+    @Param('id') id: string,
+    @Body() dto: RevealContactRequestDto,
+  ): Promise<RevealContactResponseDto> {
+    const whatsapp = await this.revealPropertyContactUseCase.execute(
+      new RevealPropertyContactCommand(id, dto.token),
+    );
+    return { whatsapp };
   }
 
   @ApiOperation({ summary: 'Publish a new property listing (ADMIN only)' })
@@ -132,6 +166,8 @@ export class PropertiesController {
         dto.images,
         dto.videos,
         dto.whatsapp,
+        dto.latitude,
+        dto.longitude,
       ),
     );
     return PropertyResponseMapper.toDto(property);

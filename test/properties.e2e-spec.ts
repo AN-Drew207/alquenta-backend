@@ -8,6 +8,12 @@ import {
 } from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
+interface PropertyTestResponse {
+  id: string;
+  price: number;
+  status: string;
+}
+
 describe('Properties (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -60,6 +66,7 @@ describe('Properties (e2e)', () => {
         type: 'APARTMENT',
         operationType: 'RENT',
         price: 500,
+        images: ['https://example.com/photo.jpg'],
       })
       .expect(201);
 
@@ -67,7 +74,7 @@ describe('Properties (e2e)', () => {
       title: 'E2E Test Apartment',
       status: 'AVAILABLE',
     });
-    propertyId = res.body.id;
+    propertyId = (res.body as PropertyTestResponse).id;
   });
 
   it('shows the property in the public catalog without auth', async () => {
@@ -75,9 +82,8 @@ describe('Properties (e2e)', () => {
       .get('/api/properties')
       .expect(200);
 
-    expect(res.body.some((p: { id: string }) => p.id === propertyId)).toBe(
-      true,
-    );
+    const body = res.body as PropertyTestResponse[];
+    expect(body.some((p) => p.id === propertyId)).toBe(true);
   });
 
   it('returns the property by id without auth', () => {
@@ -85,7 +91,7 @@ describe('Properties (e2e)', () => {
       .get(`/api/properties/${propertyId}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body.id).toBe(propertyId);
+        expect((res.body as PropertyTestResponse).id).toBe(propertyId);
       });
   });
 
@@ -104,11 +110,22 @@ describe('Properties (e2e)', () => {
       .send({ price: 600 })
       .expect(200)
       .expect((res) => {
-        expect(res.body.price).toBe(600);
+        expect((res.body as PropertyTestResponse).price).toBe(600);
       });
   });
 
-  it('lets the owning admin delete their property', () => {
+  it('requires the property to be cancelled before deleting it', async () => {
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${propertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'CANCELLED' })
+      .expect(200)
+      .expect((res) => {
+        expect((res.body as PropertyTestResponse).status).toBe('CANCELLED');
+      });
+  });
+
+  it('lets the owning admin delete their cancelled property', () => {
     return request(app.getHttpServer())
       .delete(`/api/properties/${propertyId}`)
       .set('Cookie', adminACookie)
@@ -119,5 +136,47 @@ describe('Properties (e2e)', () => {
     return request(app.getHttpServer())
       .get(`/api/properties/${propertyId}`)
       .expect(404);
+  });
+
+  it('permanently locks a property once marked as rented/sold', async () => {
+    const publish = await request(app.getHttpServer())
+      .post('/api/properties')
+      .set('Cookie', adminACookie)
+      .send({
+        title: 'E2E Finalized Property',
+        description: 'desc',
+        address: 'addr',
+        state: 'Miranda',
+        municipality: 'Baruta',
+        type: 'APARTMENT',
+        operationType: 'RENT',
+        price: 500,
+        images: ['https://example.com/photo.jpg'],
+      })
+      .expect(201);
+    const finalizedPropertyId = (publish.body as PropertyTestResponse).id;
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'RENTED_OR_SOLD' })
+      .expect(200)
+      .expect((res) => {
+        expect((res.body as PropertyTestResponse).status).toBe(
+          'RENTED_OR_SOLD',
+        );
+      });
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ price: 700 })
+      .expect(422);
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'CANCELLED' })
+      .expect(422);
   });
 });

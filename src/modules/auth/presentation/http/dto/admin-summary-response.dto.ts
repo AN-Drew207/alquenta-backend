@@ -21,4 +21,7 @@ export class AdminSummaryResponseDto {
 
   @ApiProperty({ required: false, nullable: true })
   deactivatedAt: Date | null;
+
+  @ApiProperty()
+  isVerified: boolean;
 }

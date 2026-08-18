@@ -3,21 +3,10 @@ import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { splitName } from '../src/modules/auth/domain/entities/split-name';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
-
-function splitName(fullName: string): { firstName: string; lastName: string } {
-  const trimmed = fullName.trim();
-  const spaceIndex = trimmed.indexOf(' ');
-  if (spaceIndex === -1) {
-    return { firstName: trimmed, lastName: ' ' };
-  }
-  return {
-    firstName: trimmed.slice(0, spaceIndex),
-    lastName: trimmed.slice(spaceIndex + 1),
-  };
-}
 
 async function main() {
   const passwordHash = await bcrypt.hash('password123', 10);

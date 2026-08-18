@@ -14,6 +14,7 @@ import { Message } from '../../../domain/entities/message.entity';
 import { ConversationRepository } from '../../../domain/repositories/conversation.repository';
 import { MessageRepository } from '../../../domain/repositories/message.repository';
 import { PropertyNotAvailableException } from '../../../domain/exceptions/property-not-available.exception';
+import { CannotMessageOwnPropertyException } from '../../../domain/exceptions/cannot-message-own-property.exception';
 import { StartConversationCommand } from './start-conversation.command';
 
 export interface StartConversationResult {
@@ -49,9 +50,12 @@ export class StartConversationUseCase
     if (property.status !== PropertyStatus.AVAILABLE) {
       throw new PropertyNotAvailableException(command.propertyId);
     }
+    if (property.adminId === command.clientId) {
+      throw new CannotMessageOwnPropertyException(command.propertyId);
+    }
 
     const client = await this.userRepository.findById(command.clientId);
-    const clientName = client?.name ?? 'Un cliente';
+    const clientName = client?.name ?? 'Alguien';
 
     const candidate = Conversation.create({
       propertyId: property.id,

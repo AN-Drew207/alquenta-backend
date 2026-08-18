@@ -21,6 +21,15 @@ export class UserResponseMapper {
       id: user.id,
       name: user.name,
       role: user.role,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      website: user.website,
+      memberSince: user.createdAt,
+      isVerified: user.isVerified,
+      // Contact details are only public when the user opted in — same
+      // toggles that already gate them elsewhere (profile settings).
+      phone: user.showWhatsapp ? user.phone : null,
+      email: user.showEmail ? user.email : null,
     };
   }
 
@@ -63,6 +72,7 @@ export class UserResponseMapper {
       planId: user.planId,
       createdAt: user.createdAt,
       deactivatedAt: user.deactivatedAt,
+      isVerified: user.isVerified,
     };
   }
 }

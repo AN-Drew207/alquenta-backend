@@ -10,7 +10,6 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../../shared/domain/authenticated-user.interface';
@@ -34,7 +33,6 @@ export class AccountController {
     private readonly sessionRepository: SessionRepository,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly exportAccountDataUseCase: ExportAccountDataUseCase,
-    private readonly configService: ConfigService,
   ) {}
 
   @ApiOperation({ summary: "Change the authenticated user's password" })
@@ -123,7 +121,7 @@ export class AccountController {
     user.deactivate();
     await this.userRepository.save(user);
     await this.sessionRepository.deleteAllForUser(authenticatedUser.id);
-    res.clearCookie(COOKIE_NAME, cookieOptions(this.configService));
+    res.clearCookie(COOKIE_NAME, cookieOptions());
     return { ok: true };
   }
 
@@ -151,7 +149,7 @@ export class AccountController {
 
     await this.sessionRepository.deleteAllForUser(authenticatedUser.id);
     await this.userRepository.delete(authenticatedUser.id);
-    res.clearCookie(COOKIE_NAME, cookieOptions(this.configService));
+    res.clearCookie(COOKIE_NAME, cookieOptions());
     return { ok: true };
   }
 }

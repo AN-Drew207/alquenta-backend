@@ -27,6 +27,14 @@ export class PrismaPropertyRepository implements PropertyRepository {
     return row ? PropertyMapper.toDomain(row) : null;
   }
 
+  async findByIds(ids: string[]): Promise<Property[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.prisma.property.findMany({
+      where: { id: { in: ids } },
+    });
+    return rows.map(PropertyMapper.toDomain);
+  }
+
   async findMany(filters: PropertyFilters): Promise<Property[]> {
     const hasPriceRange =
       filters.minPrice !== undefined || filters.maxPrice !== undefined;
@@ -50,8 +58,13 @@ export class PrismaPropertyRepository implements PropertyRepository {
         ...(filters.parkingSpaces !== undefined && {
           parkingSpaces: { gte: filters.parkingSpaces },
         }),
+        ...(filters.search && {
+          title: { contains: filters.search, mode: 'insensitive' },
+        }),
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: {
+        [filters.sortBy ?? 'createdAt']: filters.sortOrder ?? 'desc',
+      },
     });
     return rows.map(PropertyMapper.toDomain);
   }

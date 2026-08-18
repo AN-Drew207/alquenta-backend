@@ -1,8 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { PropertyType } from '../../../domain/enums/property-type.enum';
 import { OperationType } from '../../../domain/enums/operation-type.enum';
+import type {
+  PropertySortBy,
+  SortOrder,
+} from '../../../domain/repositories/property-filters.interface';
 
 export class ListPropertiesQueryDto {
   @ApiProperty({ enum: PropertyType, required: false })
@@ -64,4 +76,25 @@ export class ListPropertiesQueryDto {
   @IsInt()
   @Min(0)
   parkingSpaces?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'Case-insensitive substring match against the title.',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty({
+    required: false,
+    enum: ['price', 'createdAt', 'squareMeters'],
+  })
+  @IsOptional()
+  @IsIn(['price', 'createdAt', 'squareMeters'])
+  sortBy?: PropertySortBy;
+
+  @ApiProperty({ required: false, enum: ['asc', 'desc'] })
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  sortOrder?: SortOrder;
 }

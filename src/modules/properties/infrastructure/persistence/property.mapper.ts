@@ -28,6 +28,8 @@ export class PropertyMapper {
       images: row.images,
       videos: row.videos,
       whatsapp: row.whatsapp,
+      latitude: row.latitude,
+      longitude: row.longitude,
       cancelledAt: row.cancelledAt,
       createdAt: row.createdAt,
     });
@@ -53,6 +55,8 @@ export class PropertyMapper {
       images: property.images,
       videos: property.videos,
       whatsapp: property.whatsapp,
+      latitude: property.latitude,
+      longitude: property.longitude,
       cancelledAt: property.cancelledAt,
       createdAt: property.createdAt,
     };

@@ -4,11 +4,13 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
+import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
 import { DomainExceptionFilter } from '../../src/shared/presentation/filters/domain-exception.filter';
 import { PrismaService } from '../../src/shared/infrastructure/prisma/prisma.service';
+import { splitName } from '../../src/modules/auth/domain/entities/split-name';
 
-export async function createTestApp(): Promise<INestApplication> {
+export async function createTestApp(): Promise<INestApplication<App>> {
   const moduleFixture = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
@@ -51,10 +53,7 @@ export async function seedAdmin(
   prisma: PrismaService,
   params: { email: string; password: string; name: string },
 ): Promise<void> {
-  const spaceIndex = params.name.indexOf(' ');
-  const firstName =
-    spaceIndex === -1 ? params.name : params.name.slice(0, spaceIndex);
-  const lastName = spaceIndex === -1 ? ' ' : params.name.slice(spaceIndex + 1);
+  const { firstName, lastName } = splitName(params.name);
   await prisma.user.create({
     data: {
       id: randomUUID(),
@@ -69,7 +68,7 @@ export async function seedAdmin(
 }
 
 export async function loginAndExtractCookie(
-  app: INestApplication,
+  app: INestApplication<App>,
   email: string,
   password: string,
 ): Promise<string> {

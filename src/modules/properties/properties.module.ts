@@ -11,6 +11,9 @@ import { ListPropertiesUseCase } from './application/use-cases/list-properties/l
 import { GetPropertyByIdUseCase } from './application/use-cases/get-property-by-id/get-property-by-id.use-case';
 import { CancelPropertyUseCase } from './application/use-cases/cancel-property/cancel-property.use-case';
 import { PurgeStaleCancelledPropertiesUseCase } from './application/use-cases/purge-stale-cancelled-properties/purge-stale-cancelled-properties.use-case';
+import { ResolvePropertyWhatsappUseCase } from './application/use-cases/resolve-property-whatsapp/resolve-property-whatsapp.use-case';
+import { RevealPropertyContactUseCase } from './application/use-cases/reveal-property-contact/reveal-property-contact.use-case';
+import { ContactRevealTokenService } from './infrastructure/security/contact-reveal-token.service';
 import { CancelledPropertiesCleanupTask } from './application/tasks/cancelled-properties-cleanup.task';
 import { PropertiesController } from './presentation/http/properties.controller';
 
@@ -26,6 +29,9 @@ import { PropertiesController } from './presentation/http/properties.controller'
     GetPropertyByIdUseCase,
     CancelPropertyUseCase,
     PurgeStaleCancelledPropertiesUseCase,
+    ResolvePropertyWhatsappUseCase,
+    RevealPropertyContactUseCase,
+    ContactRevealTokenService,
     CancelledPropertiesCleanupTask,
   ],
   exports: [PropertyRepository],

@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../shared/presentation/decorators/current-user.decorator';
 import { Role } from '../../shared/domain/role.enum';
@@ -6,6 +6,7 @@ import type { AuthenticatedUser } from '../../shared/domain/authenticated-user.i
 import { MediaService } from './media.service';
 import { MediaSignatureRequestDto } from './dto/media-signature-request.dto';
 import { MediaSignatureResponseDto } from './dto/media-signature-response.dto';
+import { AdminRequiredForPropertyMediaException } from './exceptions/admin-required-for-property-media.exception';
 
 @ApiTags('media')
 @Controller('media')
@@ -23,7 +24,7 @@ export class MediaController {
   ): MediaSignatureResponseDto {
     const target = dto.target ?? 'property';
     if (target === 'property' && user.role !== Role.ADMIN) {
-      throw new ForbiddenException('Only admins can upload property media');
+      throw new AdminRequiredForPropertyMediaException();
     }
 
     return this.mediaService.createUploadSignature(dto.resourceType, target);

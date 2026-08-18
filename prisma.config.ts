@@ -10,6 +10,11 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Only used by the Prisma CLI (generate/migrate), never by the running
+    // app (see PrismaService, which reads DATABASE_URL directly for its own
+    // connection). Must be the direct/non-pooled connection: PgBouncer's
+    // transaction-mode pooling can't hold the session-level advisory lock
+    // `migrate deploy` needs, which times out with P1002 on the pooled URL.
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });

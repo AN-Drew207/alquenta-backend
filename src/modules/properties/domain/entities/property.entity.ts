@@ -3,6 +3,7 @@ import { PropertyType } from '../enums/property-type.enum';
 import { OperationType } from '../enums/operation-type.enum';
 import { PropertyStatus } from '../enums/property-status.enum';
 import { InvalidPriceException } from '../exceptions/invalid-price.exception';
+import { PropertyAlreadyFinalizedException } from '../exceptions/property-already-finalized.exception';
 
 export interface PropertyChanges {
   title?: string;
@@ -21,6 +22,8 @@ export interface PropertyChanges {
   images?: string[];
   videos?: string[];
   whatsapp?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export class Property {
@@ -43,6 +46,8 @@ export class Property {
     private _images: string[],
     private _videos: string[],
     private _whatsapp: string | null,
+    private _latitude: number | null,
+    private _longitude: number | null,
     private _cancelledAt: Date | null,
     private readonly _createdAt: Date,
   ) {}
@@ -64,6 +69,8 @@ export class Property {
     images?: string[];
     videos?: string[];
     whatsapp?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }): Property {
     if (params.price <= 0) {
       throw new InvalidPriceException();
@@ -87,6 +94,8 @@ export class Property {
       params.images ?? [],
       params.videos ?? [],
       params.whatsapp ?? null,
+      params.latitude ?? null,
+      params.longitude ?? null,
       null,
       new Date(),
     );
@@ -111,6 +120,8 @@ export class Property {
     images: string[];
     videos: string[];
     whatsapp: string | null;
+    latitude: number | null;
+    longitude: number | null;
     cancelledAt: Date | null;
     createdAt: Date;
   }): Property {
@@ -133,6 +144,8 @@ export class Property {
       params.images,
       params.videos,
       params.whatsapp,
+      params.latitude,
+      params.longitude,
       params.cancelledAt,
       params.createdAt,
     );
@@ -143,6 +156,9 @@ export class Property {
   }
 
   updateDetails(changes: PropertyChanges): void {
+    if (this._status === PropertyStatus.RENTED_OR_SOLD) {
+      throw new PropertyAlreadyFinalizedException(this._id);
+    }
     if (changes.price !== undefined) {
       if (changes.price <= 0) {
         throw new InvalidPriceException();
@@ -171,6 +187,8 @@ export class Property {
     if (changes.images !== undefined) this._images = changes.images;
     if (changes.videos !== undefined) this._videos = changes.videos;
     if (changes.whatsapp !== undefined) this._whatsapp = changes.whatsapp;
+    if (changes.latitude !== undefined) this._latitude = changes.latitude;
+    if (changes.longitude !== undefined) this._longitude = changes.longitude;
   }
 
   get id(): string {
@@ -243,6 +261,14 @@ export class Property {
 
   get whatsapp(): string | null {
     return this._whatsapp;
+  }
+
+  get latitude(): number | null {
+    return this._latitude;
+  }
+
+  get longitude(): number | null {
+    return this._longitude;
   }
 
   get cancelledAt(): Date | null {

@@ -9,15 +9,23 @@ import {
 } from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
+interface StartConversationTestResponse {
+  conversation: { id: string; propertyId: string };
+  message: { id: string; content: string };
+}
+
 describe('Messaging (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let adminCookie: string;
+  let otherAdminCookie: string;
   let clientCookie: string;
   let strangerCookie: string;
   let propertyId: string;
+  let clientConversationId: string;
 
   const adminEmail = 'admin@e2e-messaging.test';
+  const otherAdminEmail = 'other-admin@e2e-messaging.test';
   const clientEmail = 'client@e2e-messaging.test';
   const strangerEmail = 'stranger@e2e-messaging.test';
   const password = 'password123';
@@ -28,6 +36,17 @@ describe('Messaging (e2e)', () => {
 
     await seedAdmin(prisma, { email: adminEmail, password, name: 'Msg Admin' });
     adminCookie = await loginAndExtractCookie(app, adminEmail, password);
+
+    await seedAdmin(prisma, {
+      email: otherAdminEmail,
+      password,
+      name: 'Other Msg Admin',
+    });
+    otherAdminCookie = await loginAndExtractCookie(
+      app,
+      otherAdminEmail,
+      password,
+    );
 
     const registerClient = await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -51,13 +70,18 @@ describe('Messaging (e2e)', () => {
         type: 'HOUSE',
         operationType: 'SALE',
         price: 100000,
+        images: ['https://example.com/photo.jpg'],
       });
-    propertyId = property.body.id;
+    propertyId = (property.body as { id: string }).id;
   });
 
   afterAll(async () => {
     const users = await prisma.user.findMany({
-      where: { email: { in: [adminEmail, clientEmail, strangerEmail] } },
+      where: {
+        email: {
+          in: [adminEmail, otherAdminEmail, clientEmail, strangerEmail],
+        },
+      },
       select: { id: true },
     });
     const userIds = users.map((u) => u.id);
@@ -84,16 +108,30 @@ describe('Messaging (e2e)', () => {
       .send({ propertyId, content: 'Is this available?' })
       .expect(201);
 
-    expect(res.body.conversation.propertyId).toBe(propertyId);
-    expect(res.body.message.content).toBe('Is this available?');
+    const body = res.body as StartConversationTestResponse;
+    expect(body.conversation.propertyId).toBe(propertyId);
+    expect(body.message.content).toBe('Is this available?');
+    clientConversationId = body.conversation.id;
   });
 
-  it('rejects an ADMIN starting a conversation (CLIENT only)', () => {
+  it('rejects an ADMIN starting a conversation on their own property', () => {
     return request(app.getHttpServer())
       .post('/api/conversations')
       .set('Cookie', adminCookie)
       .send({ propertyId, content: 'hi' })
-      .expect(403);
+      .expect(422);
+  });
+
+  it("lets an ADMIN contact another admin's available property", async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/conversations')
+      .set('Cookie', otherAdminCookie)
+      .send({ propertyId, content: 'Interested on behalf of a buyer' })
+      .expect(201);
+
+    const body = res.body as StartConversationTestResponse;
+    expect(body.conversation.propertyId).toBe(propertyId);
+    expect(body.message.content).toBe('Interested on behalf of a buyer');
   });
 
   it('reuses the same conversation on a second contact from the same client', async () => {
@@ -109,7 +147,9 @@ describe('Messaging (e2e)', () => {
       .send({ propertyId, content: 'second' })
       .expect(201);
 
-    expect(second.body.conversation.id).toBe(first.body.conversation.id);
+    expect((second.body as StartConversationTestResponse).conversation.id).toBe(
+      (first.body as StartConversationTestResponse).conversation.id,
+    );
   });
 
   it('converges to a single conversation under concurrent contact requests', async () => {
@@ -124,44 +164,35 @@ describe('Messaging (e2e)', () => {
         .send({ propertyId, content: 'race B' }),
     ]);
 
+    const bodyA = resA.body as StartConversationTestResponse;
+    const bodyB = resB.body as StartConversationTestResponse;
     expect(resA.status).toBe(201);
     expect(resB.status).toBe(201);
-    expect(resA.body.conversation.id).toBe(resB.body.conversation.id);
-    expect(resA.body.message.id).not.toBe(resB.body.message.id);
+    expect(bodyA.conversation.id).toBe(bodyB.conversation.id);
+    expect(bodyA.message.id).not.toBe(bodyB.message.id);
   });
 
   it("rejects a non-participant from reading the conversation's messages", async () => {
-    const conv = await prisma.conversation.findFirstOrThrow({
-      where: { propertyId },
-    });
-
     return request(app.getHttpServer())
-      .get(`/api/conversations/${conv.id}/messages`)
+      .get(`/api/conversations/${clientConversationId}/messages`)
       .set('Cookie', strangerCookie)
       .expect(403);
   });
 
   it('lets the admin reply, and the client sees it', async () => {
-    const conv = await prisma.conversation.findFirstOrThrow({
-      where: { propertyId },
-    });
-
     await request(app.getHttpServer())
-      .post(`/api/conversations/${conv.id}/messages`)
+      .post(`/api/conversations/${clientConversationId}/messages`)
       .set('Cookie', adminCookie)
       .send({ content: 'Sure, still available' })
       .expect(201);
 
     const messages = await request(app.getHttpServer())
-      .get(`/api/conversations/${conv.id}/messages`)
+      .get(`/api/conversations/${clientConversationId}/messages`)
       .set('Cookie', clientCookie)
       .expect(200);
 
-    expect(
-      messages.body.some(
-        (m: { content: string }) => m.content === 'Sure, still available',
-      ),
-    ).toBe(true);
+    const body = messages.body as { content: string }[];
+    expect(body.some((m) => m.content === 'Sure, still available')).toBe(true);
   });
 
   it('rejects starting a new conversation on a non-available property', async () => {

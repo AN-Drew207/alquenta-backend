@@ -46,8 +46,9 @@ describe('Auth (e2e)', () => {
       .send({ email: clientEmail, password, name: 'E2E Client' })
       .expect(201)
       .expect((res) => {
+        const body = res.body as { passwordHash?: string };
         expect(res.body).toMatchObject({ email: clientEmail, role: 'CLIENT' });
-        expect(res.body.passwordHash).toBeUndefined();
+        expect(body.passwordHash).toBeUndefined();
       });
   });
 

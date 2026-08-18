@@ -8,6 +8,12 @@ import {
 } from './utils/create-test-app';
 import { PrismaService } from '../src/shared/infrastructure/prisma/prisma.service';
 
+interface PropertyTestResponse {
+  id: string;
+  price: number;
+  status: string;
+}
+
 describe('Properties (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -68,7 +74,7 @@ describe('Properties (e2e)', () => {
       title: 'E2E Test Apartment',
       status: 'AVAILABLE',
     });
-    propertyId = res.body.id;
+    propertyId = (res.body as PropertyTestResponse).id;
   });
 
   it('shows the property in the public catalog without auth', async () => {
@@ -76,9 +82,8 @@ describe('Properties (e2e)', () => {
       .get('/api/properties')
       .expect(200);
 
-    expect(res.body.some((p: { id: string }) => p.id === propertyId)).toBe(
-      true,
-    );
+    const body = res.body as PropertyTestResponse[];
+    expect(body.some((p) => p.id === propertyId)).toBe(true);
   });
 
   it('returns the property by id without auth', () => {
@@ -86,7 +91,7 @@ describe('Properties (e2e)', () => {
       .get(`/api/properties/${propertyId}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body.id).toBe(propertyId);
+        expect((res.body as PropertyTestResponse).id).toBe(propertyId);
       });
   });
 
@@ -105,7 +110,7 @@ describe('Properties (e2e)', () => {
       .send({ price: 600 })
       .expect(200)
       .expect((res) => {
-        expect(res.body.price).toBe(600);
+        expect((res.body as PropertyTestResponse).price).toBe(600);
       });
   });
 
@@ -116,7 +121,7 @@ describe('Properties (e2e)', () => {
       .send({ status: 'CANCELLED' })
       .expect(200)
       .expect((res) => {
-        expect(res.body.status).toBe('CANCELLED');
+        expect((res.body as PropertyTestResponse).status).toBe('CANCELLED');
       });
   });
 
@@ -149,7 +154,7 @@ describe('Properties (e2e)', () => {
         images: ['https://example.com/photo.jpg'],
       })
       .expect(201);
-    const finalizedPropertyId = publish.body.id;
+    const finalizedPropertyId = (publish.body as PropertyTestResponse).id;
 
     await request(app.getHttpServer())
       .patch(`/api/properties/${finalizedPropertyId}`)
@@ -157,7 +162,9 @@ describe('Properties (e2e)', () => {
       .send({ status: 'RENTED_OR_SOLD' })
       .expect(200)
       .expect((res) => {
-        expect(res.body.status).toBe('RENTED_OR_SOLD');
+        expect((res.body as PropertyTestResponse).status).toBe(
+          'RENTED_OR_SOLD',
+        );
       });
 
     await request(app.getHttpServer())

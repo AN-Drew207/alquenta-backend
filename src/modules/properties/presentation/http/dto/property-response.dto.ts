@@ -58,13 +58,11 @@ export class PropertyResponseDto {
   @ApiProperty({ required: false, nullable: true })
   whatsapp: string | null;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-    description:
-      'Effective WhatsApp number to contact about this listing (this property\'s own number, or the owner\'s profile number if they opted to show it)',
-  })
-  contactWhatsapp: string | null;
+  @ApiProperty({ required: false, nullable: true })
+  latitude: number | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  longitude: number | null;
 
   @ApiProperty()
   createdAt: Date;

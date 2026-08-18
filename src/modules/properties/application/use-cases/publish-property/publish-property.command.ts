@@ -19,5 +19,7 @@ export class PublishPropertyCommand {
     readonly images?: string[],
     readonly videos?: string[],
     readonly whatsapp?: string,
+    readonly latitude?: number,
+    readonly longitude?: number,
   ) {}
 }

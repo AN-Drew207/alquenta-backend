@@ -10,6 +10,7 @@ import { PrismaUserRepository } from './infrastructure/persistence/prisma-user.r
 import { PrismaSessionRepository } from './infrastructure/persistence/prisma-session.repository';
 import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-hasher';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { JWT_EXPIRES_IN_DEFAULT_SECONDS } from './presentation/http/auth-cookie';
 import { RegisterUseCase } from './application/use-cases/register/register.use-case';
 import { LoginUseCase } from './application/use-cases/login/login.use-case';
 import { ReactivateAccountUseCase } from './application/use-cases/reactivate-account/reactivate-account.use-case';
@@ -23,6 +24,8 @@ import { AcceptAdminInvitationUseCase } from './application/use-cases/accept-adm
 import { ListAdminsUseCase } from './application/use-cases/list-admins/list-admins.use-case';
 import { DisableAdminUseCase } from './application/use-cases/disable-admin/disable-admin.use-case';
 import { EnableAdminUseCase } from './application/use-cases/enable-admin/enable-admin.use-case';
+import { VerifyAdminUseCase } from './application/use-cases/verify-admin/verify-admin.use-case';
+import { UnverifyAdminUseCase } from './application/use-cases/unverify-admin/unverify-admin.use-case';
 import { DeleteAdminUseCase } from './application/use-cases/delete-admin/delete-admin.use-case';
 import { AuthController } from './presentation/http/auth.controller';
 import { ProfileController } from './presentation/http/profile.controller';
@@ -38,7 +41,9 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: Number(configService.get<string>('JWT_EXPIRES_IN')) || 604800,
+          expiresIn:
+            Number(configService.get<string>('JWT_EXPIRES_IN')) ||
+            JWT_EXPIRES_IN_DEFAULT_SECONDS,
         },
       }),
     }),
@@ -66,6 +71,8 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
     ListAdminsUseCase,
     DisableAdminUseCase,
     EnableAdminUseCase,
+    VerifyAdminUseCase,
+    UnverifyAdminUseCase,
     DeleteAdminUseCase,
     JwtStrategy,
   ],

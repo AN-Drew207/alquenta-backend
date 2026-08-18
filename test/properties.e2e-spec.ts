@@ -60,6 +60,7 @@ describe('Properties (e2e)', () => {
         type: 'APARTMENT',
         operationType: 'RENT',
         price: 500,
+        images: ['https://example.com/photo.jpg'],
       })
       .expect(201);
 
@@ -108,7 +109,18 @@ describe('Properties (e2e)', () => {
       });
   });
 
-  it('lets the owning admin delete their property', () => {
+  it('requires the property to be cancelled before deleting it', async () => {
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${propertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'CANCELLED' })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.status).toBe('CANCELLED');
+      });
+  });
+
+  it('lets the owning admin delete their cancelled property', () => {
     return request(app.getHttpServer())
       .delete(`/api/properties/${propertyId}`)
       .set('Cookie', adminACookie)
@@ -119,5 +131,45 @@ describe('Properties (e2e)', () => {
     return request(app.getHttpServer())
       .get(`/api/properties/${propertyId}`)
       .expect(404);
+  });
+
+  it('permanently locks a property once marked as rented/sold', async () => {
+    const publish = await request(app.getHttpServer())
+      .post('/api/properties')
+      .set('Cookie', adminACookie)
+      .send({
+        title: 'E2E Finalized Property',
+        description: 'desc',
+        address: 'addr',
+        state: 'Miranda',
+        municipality: 'Baruta',
+        type: 'APARTMENT',
+        operationType: 'RENT',
+        price: 500,
+        images: ['https://example.com/photo.jpg'],
+      })
+      .expect(201);
+    const finalizedPropertyId = publish.body.id;
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'RENTED_OR_SOLD' })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.status).toBe('RENTED_OR_SOLD');
+      });
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ price: 700 })
+      .expect(422);
+
+    await request(app.getHttpServer())
+      .patch(`/api/properties/${finalizedPropertyId}`)
+      .set('Cookie', adminACookie)
+      .send({ status: 'CANCELLED' })
+      .expect(422);
   });
 });

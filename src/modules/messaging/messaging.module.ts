@@ -10,6 +10,7 @@ import { StartConversationUseCase } from './application/use-cases/start-conversa
 import { ReplyToConversationUseCase } from './application/use-cases/reply-to-conversation/reply-to-conversation.use-case';
 import { ListMyConversationsUseCase } from './application/use-cases/list-my-conversations/list-my-conversations.use-case';
 import { ListConversationMessagesUseCase } from './application/use-cases/list-conversation-messages/list-conversation-messages.use-case';
+import { GetAdminResponseStatsUseCase } from './application/use-cases/get-admin-response-stats/get-admin-response-stats.use-case';
 import { ConversationsController } from './presentation/http/conversations.controller';
 
 @Module({
@@ -22,6 +23,7 @@ import { ConversationsController } from './presentation/http/conversations.contr
     ReplyToConversationUseCase,
     ListMyConversationsUseCase,
     ListConversationMessagesUseCase,
+    GetAdminResponseStatsUseCase,
   ],
   exports: [ConversationRepository, MessageRepository],
 })

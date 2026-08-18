@@ -10,6 +10,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { JwtService } from '@nestjs/jwt';
 import type { Request, Response } from 'express';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
@@ -38,7 +39,7 @@ import { AcceptAdminInvitationRequestDto } from './dto/accept-admin-invitation-r
 import { UserResponseDto } from './dto/user-response.dto';
 import { PublicProfileResponseDto } from './dto/public-profile-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
-import { COOKIE_MAX_AGE_MS, COOKIE_NAME, cookieOptions } from './auth-cookie';
+import { COOKIE_NAME, cookieMaxAgeMs, cookieOptions } from './auth-cookie';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,6 +59,7 @@ export class AuthController {
     summary: 'Register a new CLIENT account and set the session cookie',
   })
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('register')
   async register(
     @Body() dto: RegisterRequestDto,
@@ -75,6 +77,7 @@ export class AuthController {
     summary: 'Log in with email and password, sets the session cookie',
   })
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('login')
   @HttpCode(200)
   async login(
@@ -94,6 +97,7 @@ export class AuthController {
       'Reactivate a self-deactivated account (re-verifies credentials) and sign in. Accounts disabled by a superadmin cannot be reactivated this way.',
   })
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('reactivate')
   @HttpCode(200)
   async reactivate(
@@ -202,7 +206,7 @@ export class AuthController {
     });
     res.cookie(COOKIE_NAME, token, {
       ...cookieOptions(),
-      maxAge: COOKIE_MAX_AGE_MS,
+      maxAge: cookieMaxAgeMs(),
     });
   }
 }

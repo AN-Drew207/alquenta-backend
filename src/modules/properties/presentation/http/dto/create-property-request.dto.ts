@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsEnum,
   IsInt,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -70,12 +73,17 @@ export class CreatePropertyRequestDto {
   @IsPositive()
   squareMeters?: number;
 
-  @ApiProperty({ required: false, type: [String], maxItems: MAX_IMAGES })
-  @IsOptional()
+  @ApiProperty({
+    type: [String],
+    minItems: 1,
+    maxItems: MAX_IMAGES,
+    description: 'At least one photo is required to publish a listing.',
+  })
   @IsArray()
+  @ArrayMinSize(1)
   @ArrayMaxSize(MAX_IMAGES)
   @IsString({ each: true })
-  images?: string[];
+  images: string[];
 
   @ApiProperty({ required: false, type: [String], maxItems: MAX_VIDEOS })
   @IsOptional()
@@ -91,4 +99,20 @@ export class CreatePropertyRequestDto {
   @IsOptional()
   @IsString()
   whatsapp?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Latitude of the pin the admin placed on the location picker.',
+  })
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'Longitude of the pin the admin placed on the location picker.',
+  })
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number;
 }

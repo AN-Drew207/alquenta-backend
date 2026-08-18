@@ -9,12 +9,11 @@ import {
 } from 'class-validator';
 
 /**
- * Fill this in with the production Neon host once you have it at hand,
- * e.g. 'ep-xxxx-pooler.c-4.us-east-2.aws.neon.tech' (just the host, no
- * credentials). Left blank on purpose — see assertNotPointingAtProdDb
- * below. While blank, that safeguard is a no-op.
+ * Production Neon host (just the host, no credentials) — confirmed
+ * 2026-08-17. Used by assertNotPointingAtProductionDatabase below to refuse
+ * booting a non-production process against it.
  */
-const PRODUCTION_DB_HOST: string = '';
+const PRODUCTION_DB_HOST: string = 'ep-empty-shape-axezc2a4';
 
 class EnvironmentVariables {
   /**

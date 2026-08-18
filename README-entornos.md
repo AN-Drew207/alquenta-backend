@@ -32,11 +32,16 @@ Ver `.env.example` para la lista completa comentada. Puntos importantes:
   el entorno a nivel de aplicación — separado de `NODE_ENV`, que Render
   puede forzar a `production` por optimización de build incluso en el
   servicio de pruebas.
-- **`NODE_ENV` en el servicio de pruebas debe ser `production`**, no
-  `development`. Las cookies de sesión (`secure`, `sameSite`) dependen de
-  `NODE_ENV`, y el backend de pruebas también corre en HTTPS hablando con
-  un preview de Vercel en otro dominio — con `NODE_ENV=development` el
-  login se rompe silenciosamente ahí.
+- Las cookies de sesión (`secure`, `sameSite`) **no** dependen de `NODE_ENV`
+  ni de `APP_ENV` — dependen de `process.env.RENDER === 'true'`
+  (`src/modules/auth/presentation/http/auth-cookie.ts`), variable que Render
+  setea solo él mismo. Ninguna otra plataforma (local, otro host) la define,
+  así que ahí la cookie usa los defaults de desarrollo. Esto es deliberado:
+  `NODE_ENV`/`APP_ENV` no distinguen de forma confiable "desplegado" de
+  "local" (Render puede forzar `NODE_ENV=production` incluso en el servicio
+  de pruebas), y el backend de pruebas corre en HTTPS hablando con un
+  preview de Vercel en otro dominio, donde la cookie necesita `secure`+
+  `sameSite=none` para funcionar.
 - **`FRONT_URL`**: se usa tanto para CORS como para armar los links que
   van en los correos (invitación de admin, cambio de email). No existe una
   variable separada `CORS_ORIGINS` en el código — es la misma `FRONT_URL`,

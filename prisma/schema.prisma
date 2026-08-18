@@ -58,6 +58,18 @@ enum AccountType {
   CLIENT
 }
 
+enum ReportReason {
+  SCAM
+  MISLEADING_INFO
+  INAPPROPRIATE_CONTENT
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  DISMISSED
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -89,6 +101,7 @@ model User {
   twoFactorEnabled  Boolean @default(false)
   deactivatedAt     DateTime?
   deactivatedBySuperadmin Boolean @default(false)
+  isVerified   Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -98,6 +111,8 @@ model User {
   messages                 Message[]      @relation("MessageAuthor")
   notifications            Notification[]
   sessions                 Session[]
+  favorites                Favorite[]
+  reports                  Report[]
 }
 
 model Session {
@@ -132,11 +147,15 @@ model Property {
   images        String[]
   videos        String[]
   whatsapp      String?
+  latitude      Float?
+  longitude     Float?
   cancelledAt   DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   conversations Conversation[]
+  favoritedBy   Favorite[]
+  reports       Report[]
 
   @@index([status, type, state, municipality])
 }
@@ -152,6 +171,7 @@ model Conversation {
   createdAt  DateTime @default(now())
 
   messages Message[]
+  notifications Notification[]
 
   @@unique([propertyId, clientId])
 }
@@ -192,10 +212,37 @@ model Notification {
   messageId       String?
   message         Message?           @relation(fields: [messageId], references: [id], onDelete: Cascade)
   conversationId  String?
+  conversation    Conversation?      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   text            String
   status          NotificationStatus @default(PENDING)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
   @@index([recipientUserId, status])
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  propertyId String
+  property   Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+
+  @@index([status])
 }

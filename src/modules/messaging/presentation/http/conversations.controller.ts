@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../../../shared/presentation/decorators/public.decorator';
 import { Roles } from '../../../../shared/presentation/decorators/roles.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import { Role } from '../../../../shared/domain/role.enum';
@@ -11,11 +12,14 @@ import { ReplyToConversationCommand } from '../../application/use-cases/reply-to
 import { ListMyConversationsUseCase } from '../../application/use-cases/list-my-conversations/list-my-conversations.use-case';
 import { ListConversationMessagesUseCase } from '../../application/use-cases/list-conversation-messages/list-conversation-messages.use-case';
 import { ListConversationMessagesQuery } from '../../application/use-cases/list-conversation-messages/list-conversation-messages.query';
+import { GetAdminResponseStatsUseCase } from '../../application/use-cases/get-admin-response-stats/get-admin-response-stats.use-case';
+import { GetAdminResponseStatsQuery } from '../../application/use-cases/get-admin-response-stats/get-admin-response-stats.query';
 import { StartConversationRequestDto } from './dto/start-conversation-request.dto';
 import { ReplyRequestDto } from './dto/reply-request.dto';
 import { StartConversationResponseDto } from './dto/start-conversation-response.dto';
 import { ConversationResponseDto } from './dto/conversation-response.dto';
 import { MessageResponseDto } from './dto/message-response.dto';
+import { AdminResponseStatsResponseDto } from './dto/admin-response-stats-response.dto';
 import { ConversationResponseMapper } from './mappers/conversation-response.mapper';
 import { MessageResponseMapper } from './mappers/message-response.mapper';
 
@@ -27,13 +31,33 @@ export class ConversationsController {
     private readonly replyToConversationUseCase: ReplyToConversationUseCase,
     private readonly listMyConversationsUseCase: ListMyConversationsUseCase,
     private readonly listConversationMessagesUseCase: ListConversationMessagesUseCase,
+    private readonly getAdminResponseStatsUseCase: GetAdminResponseStatsUseCase,
   ) {}
 
   @ApiOperation({
     summary:
-      'Contact a property owner (CLIENT only). Reuses the existing conversation for this client+property if one already exists.',
+      "An admin's response rate and average response time, computed from their conversations (public, no auth required)",
   })
-  @Roles(Role.CLIENT)
+  @Public()
+  @Get('admins/:adminId/response-stats')
+  async getAdminResponseStats(
+    @Param('adminId') adminId: string,
+  ): Promise<AdminResponseStatsResponseDto> {
+    const stats = await this.getAdminResponseStatsUseCase.execute(
+      new GetAdminResponseStatsQuery(adminId),
+    );
+    return {
+      responseRate: stats.responseRate,
+      averageResponseMinutes: stats.averageResponseMinutes,
+      sampleSize: stats.sampleSize,
+    };
+  }
+
+  @ApiOperation({
+    summary:
+      "Contact a property owner — a CLIENT reaching out to an ADMIN, or an ADMIN reaching out to another ADMIN's listing (never their own). Reuses the existing conversation for this initiator+property if one already exists.",
+  })
+  @Roles(Role.CLIENT, Role.ADMIN)
   @Post()
   async start(
     @Body() dto: StartConversationRequestDto,

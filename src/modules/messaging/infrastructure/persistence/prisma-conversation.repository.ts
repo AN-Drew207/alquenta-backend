@@ -46,4 +46,12 @@ export class PrismaConversationRepository implements ConversationRepository {
     });
     return rows.map(ConversationMapper.toDomain);
   }
+
+  async findManyByAdminId(adminId: string): Promise<Conversation[]> {
+    const rows = await this.prisma.conversation.findMany({
+      where: { adminId },
+      include: { client: true, admin: true },
+    });
+    return rows.map(ConversationMapper.toDomain);
+  }
 }

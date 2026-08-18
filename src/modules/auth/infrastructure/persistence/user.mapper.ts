@@ -44,6 +44,7 @@ export class UserMapper {
       twoFactorEnabled: row.twoFactorEnabled,
       deactivatedAt: row.deactivatedAt,
       deactivatedBySuperadmin: row.deactivatedBySuperadmin,
+      isVerified: row.isVerified,
       createdAt: row.createdAt,
     });
   }
@@ -80,6 +81,7 @@ export class UserMapper {
       twoFactorEnabled: user.twoFactorEnabled,
       deactivatedAt: user.deactivatedAt,
       deactivatedBySuperadmin: user.deactivatedBySuperadmin,
+      isVerified: user.isVerified,
       createdAt: user.createdAt,
     };
   }

@@ -37,6 +37,8 @@ export class PublishPropertyUseCase
       images: command.images,
       videos: command.videos,
       whatsapp: command.whatsapp,
+      latitude: command.latitude,
+      longitude: command.longitude,
     });
 
     await this.propertyRepository.save(property);

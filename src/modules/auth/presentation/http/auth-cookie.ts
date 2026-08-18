@@ -1,5 +1,15 @@
 export const COOKIE_NAME = 'access_token';
-export const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Same default (seconds) as auth.module.ts's JwtModule signOptions.expiresIn
+// — both read JWT_EXPIRES_IN, so the cookie's lifetime never drifts from the
+// JWT's actual expiration.
+export const JWT_EXPIRES_IN_DEFAULT_SECONDS = 604800;
+
+export function cookieMaxAgeMs(): number {
+  const seconds =
+    Number(process.env.JWT_EXPIRES_IN) || JWT_EXPIRES_IN_DEFAULT_SECONDS;
+  return seconds * 1000;
+}
 
 export function cookieOptions(): {
   httpOnly: true;

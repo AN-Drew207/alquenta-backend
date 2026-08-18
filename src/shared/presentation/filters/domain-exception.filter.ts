@@ -11,6 +11,7 @@ import { DomainConflictException } from '../../domain/exceptions/domain-conflict
 import { DomainValidationException } from '../../domain/exceptions/domain-validation.exception';
 import { DomainForbiddenException } from '../../domain/exceptions/domain-forbidden.exception';
 import { DomainUnauthorizedException } from '../../domain/exceptions/domain-unauthorized.exception';
+import { DomainServiceUnavailableException } from '../../domain/exceptions/domain-service-unavailable.exception';
 
 @Catch(DomainException)
 export class DomainExceptionFilter implements ExceptionFilter {
@@ -39,6 +40,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
     }
     if (exception instanceof DomainUnauthorizedException) {
       return HttpStatus.UNAUTHORIZED;
+    }
+    if (exception instanceof DomainServiceUnavailableException) {
+      return HttpStatus.SERVICE_UNAVAILABLE;
     }
     return HttpStatus.UNPROCESSABLE_ENTITY;
   }

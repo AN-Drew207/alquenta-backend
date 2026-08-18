@@ -5,6 +5,7 @@ import { DomainConflictException } from '../../domain/exceptions/domain-conflict
 import { DomainValidationException } from '../../domain/exceptions/domain-validation.exception';
 import { DomainForbiddenException } from '../../domain/exceptions/domain-forbidden.exception';
 import { DomainUnauthorizedException } from '../../domain/exceptions/domain-unauthorized.exception';
+import { DomainServiceUnavailableException } from '../../domain/exceptions/domain-service-unavailable.exception';
 import { BusinessRuleViolationException } from '../../domain/exceptions/business-rule-violation.exception';
 import { DomainExceptionFilter } from './domain-exception.filter';
 
@@ -13,6 +14,7 @@ class TestConflict extends DomainConflictException {}
 class TestValidation extends DomainValidationException {}
 class TestForbidden extends DomainForbiddenException {}
 class TestUnauthorized extends DomainUnauthorizedException {}
+class TestServiceUnavailable extends DomainServiceUnavailableException {}
 class TestBusinessRule extends BusinessRuleViolationException {}
 class TestUncategorized extends DomainException {}
 
@@ -36,6 +38,7 @@ describe('DomainExceptionFilter', () => {
     [new TestValidation('x'), HttpStatus.BAD_REQUEST],
     [new TestForbidden('x'), HttpStatus.FORBIDDEN],
     [new TestUnauthorized('x'), HttpStatus.UNAUTHORIZED],
+    [new TestServiceUnavailable('x'), HttpStatus.SERVICE_UNAVAILABLE],
     [new TestBusinessRule('x'), HttpStatus.UNPROCESSABLE_ENTITY],
     [new TestUncategorized('x'), HttpStatus.UNPROCESSABLE_ENTITY],
   ])('maps %p to status %i', (exception, expectedStatus) => {

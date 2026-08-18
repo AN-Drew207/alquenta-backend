@@ -11,6 +11,10 @@ import { EnableAdminUseCase } from '../../application/use-cases/enable-admin/ena
 import { EnableAdminCommand } from '../../application/use-cases/enable-admin/enable-admin.command';
 import { DeleteAdminUseCase } from '../../application/use-cases/delete-admin/delete-admin.use-case';
 import { DeleteAdminCommand } from '../../application/use-cases/delete-admin/delete-admin.command';
+import { VerifyAdminUseCase } from '../../application/use-cases/verify-admin/verify-admin.use-case';
+import { VerifyAdminCommand } from '../../application/use-cases/verify-admin/verify-admin.command';
+import { UnverifyAdminUseCase } from '../../application/use-cases/unverify-admin/unverify-admin.use-case';
+import { UnverifyAdminCommand } from '../../application/use-cases/unverify-admin/unverify-admin.command';
 import { InviteAdminRequestDto } from './dto/invite-admin-request.dto';
 import { InviteAdminResponseDto } from './dto/invite-admin-response.dto';
 import { AdminSummaryResponseDto } from './dto/admin-summary-response.dto';
@@ -26,6 +30,8 @@ export class SuperadminController {
     private readonly disableAdminUseCase: DisableAdminUseCase,
     private readonly enableAdminUseCase: EnableAdminUseCase,
     private readonly deleteAdminUseCase: DeleteAdminUseCase,
+    private readonly verifyAdminUseCase: VerifyAdminUseCase,
+    private readonly unverifyAdminUseCase: UnverifyAdminUseCase,
   ) {}
 
   @ApiOperation({ summary: 'List every ADMIN account' })
@@ -62,6 +68,25 @@ export class SuperadminController {
   @HttpCode(200)
   async enableAdmin(@Param('id') id: string): Promise<{ ok: true }> {
     await this.enableAdminUseCase.execute(new EnableAdminCommand(id));
+    return { ok: true };
+  }
+
+  @ApiOperation({
+    summary:
+      'Mark an admin as verified (shown as a badge on their public profile). Manual decision — no automatic criteria.',
+  })
+  @Patch('admins/:id/verify')
+  @HttpCode(200)
+  async verifyAdmin(@Param('id') id: string): Promise<{ ok: true }> {
+    await this.verifyAdminUseCase.execute(new VerifyAdminCommand(id));
+    return { ok: true };
+  }
+
+  @ApiOperation({ summary: 'Remove the verified badge from an admin' })
+  @Patch('admins/:id/unverify')
+  @HttpCode(200)
+  async unverifyAdmin(@Param('id') id: string): Promise<{ ok: true }> {
+    await this.unverifyAdminUseCase.execute(new UnverifyAdminCommand(id));
     return { ok: true };
   }
 

@@ -1,11 +1,8 @@
-import {
-  Injectable,
-  Logger,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
 import { MediaSignatureResponseDto } from './dto/media-signature-response.dto';
+import { MediaUploadsNotConfiguredException } from './exceptions/media-uploads-not-configured.exception';
 
 // Property uploads are never transformed, so the URL always looks like
 // .../upload/v<version>/<public_id>.<ext> — no transformation segment to skip.
@@ -40,9 +37,7 @@ export class MediaService {
     const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
 
     if (!cloudName || !apiKey || !apiSecret) {
-      throw new ServiceUnavailableException(
-        'Media uploads are not configured yet (missing CLOUDINARY_* environment variables).',
-      );
+      throw new MediaUploadsNotConfiguredException();
     }
 
     const timestamp = Math.round(Date.now() / 1000);

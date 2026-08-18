@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Role } from '../../../../shared/domain/role.enum';
 import { AccountType } from '../enums/account-type.enum';
+import { splitName } from './split-name';
 import {
   DEFAULT_GENERAL_PREFS,
   DEFAULT_NOTIFICATION_PREFS,
@@ -9,26 +10,6 @@ import {
   NotificationPrefs,
   PrivacyPrefs,
 } from './user-preferences';
-
-/**
- * Splits a display name into firstName/lastName the same way the
- * `add_first_last_name_and_rename_show_whatsapp` migration backfilled
- * existing rows: everything before the first space is the first name,
- * everything after is the last name. When there is no space, the whole
- * value becomes the first name and the last name falls back to a single
- * space (" ").
- */
-function splitName(fullName: string): { firstName: string; lastName: string } {
-  const trimmed = fullName.trim();
-  const spaceIndex = trimmed.indexOf(' ');
-  if (spaceIndex === -1) {
-    return { firstName: trimmed, lastName: ' ' };
-  }
-  return {
-    firstName: trimmed.slice(0, spaceIndex),
-    lastName: trimmed.slice(spaceIndex + 1),
-  };
-}
 
 export interface ProfileCompletion {
   pct: number;
@@ -94,6 +75,7 @@ export class User {
     private _twoFactorEnabled: boolean,
     private _deactivatedAt: Date | null,
     private _deactivatedBySuperadmin: boolean,
+    private _isVerified: boolean,
     private readonly _createdAt: Date,
   ) {}
 
@@ -136,6 +118,7 @@ export class User {
       false,
       null,
       false,
+      false,
       new Date(),
     );
   }
@@ -170,6 +153,7 @@ export class User {
     twoFactorEnabled: boolean;
     deactivatedAt: Date | null;
     deactivatedBySuperadmin: boolean;
+    isVerified: boolean;
     createdAt: Date;
   }): User {
     return new User(
@@ -202,6 +186,7 @@ export class User {
       params.twoFactorEnabled,
       params.deactivatedAt,
       params.deactivatedBySuperadmin,
+      params.isVerified,
       params.createdAt,
     );
   }
@@ -264,6 +249,15 @@ export class User {
   reactivate(): void {
     this._deactivatedAt = null;
     this._deactivatedBySuperadmin = false;
+  }
+
+  /** Manual SUPERADMIN decision — no automatic criteria. */
+  verify(): void {
+    this._isVerified = true;
+  }
+
+  unverify(): void {
+    this._isVerified = false;
   }
 
   get id(): string {
@@ -380,6 +374,10 @@ export class User {
 
   get deactivatedBySuperadmin(): boolean {
     return this._deactivatedBySuperadmin;
+  }
+
+  get isVerified(): boolean {
+    return this._isVerified;
   }
 
   get createdAt(): Date {

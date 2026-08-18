@@ -8,4 +8,5 @@ export abstract class ConversationRepository {
   ): Promise<Conversation>;
   abstract findById(id: string): Promise<Conversation | null>;
   abstract findManyByUser(userId: string): Promise<Conversation[]>;
+  abstract findManyByAdminId(adminId: string): Promise<Conversation[]>;
 }

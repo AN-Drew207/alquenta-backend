@@ -6,5 +6,7 @@ export class CreateNotificationCommand {
     readonly type: NotificationType,
     readonly text: string,
     readonly messageId?: string,
+    readonly conversationId?: string,
+    readonly propertyId?: string,
   ) {}
 }

@@ -128,4 +128,22 @@ export class PrismaPropertyAnalyticsEventRepository implements PropertyAnalytics
       count: row._count._all,
     }));
   }
+
+  async countContactEventsSince(
+    propertyId: string,
+    since: Date,
+  ): Promise<number> {
+    return this.prisma.propertyAnalyticsEvent.count({
+      where: {
+        propertyId,
+        type: {
+          in: [
+            PropertyAnalyticsEventType.WHATSAPP_REVEAL,
+            PropertyAnalyticsEventType.MESSAGE_STARTED,
+          ],
+        },
+        occurredAt: { gte: since },
+      },
+    });
+  }
 }

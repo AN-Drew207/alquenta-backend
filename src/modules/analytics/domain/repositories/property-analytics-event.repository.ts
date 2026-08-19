@@ -56,4 +56,16 @@ export abstract class PropertyAnalyticsEventRepository {
   abstract countByPropertyGroupedByDeviceType(
     propertyId: string,
   ): Promise<PropertyAnalyticsDeviceCount[]>;
+  /**
+   * Count of contact events (WHATSAPP_REVEAL + MESSAGE_STARTED combined)
+   * for one property, from `since` (inclusive) onward. Used by
+   * CheckNoContactsAlertsUseCase's 14-day "no recent contacts" check —
+   * unlike countByPropertyGroupedByDay, this needs a single number, not a
+   * day-bucketed series, so it doesn't warrant the raw-SQL date_trunc()
+   * query that method uses.
+   */
+  abstract countContactEventsSince(
+    propertyId: string,
+    since: Date,
+  ): Promise<number>;
 }

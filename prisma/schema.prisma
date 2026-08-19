@@ -45,6 +45,7 @@ enum PropertyStatus {
 
 enum NotificationType {
   NEW_MESSAGE
+  ANALYTICS_ALERT
 }
 
 enum NotificationStatus {
@@ -169,8 +170,10 @@ model Property {
   favoritedBy     Favorite[]
   reports         Report[]
   analyticsEvents PropertyAnalyticsEvent[]
+  notifications   Notification[]
 
   @@index([status, type, state, municipality])
+  @@index([state, type, operationType, status])
 }
 
 model Conversation {
@@ -226,12 +229,15 @@ model Notification {
   message         Message?           @relation(fields: [messageId], references: [id], onDelete: Cascade)
   conversationId  String?
   conversation    Conversation?      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  propertyId      String?
+  property        Property?          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   text            String
   status          NotificationStatus @default(PENDING)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
   @@index([recipientUserId, status])
+  @@index([propertyId, type, createdAt])
 }
 
 model Favorite {

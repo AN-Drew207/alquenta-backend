@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { PlansModule } from '../plans/plans.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PropertyRepository } from '../properties/domain/repositories/property.repository';
 import { PrismaPropertyRepository } from '../properties/infrastructure/persistence/prisma-property.repository';
 import { PropertyAnalyticsEventRepository } from './domain/repositories/property-analytics-event.repository';
@@ -14,6 +15,12 @@ import { GetPortfolioAnalyticsSummaryUseCase } from './application/use-cases/get
 import { GetPropertyAnalyticsTrendUseCase } from './application/use-cases/get-property-analytics-trend/get-property-analytics-trend.use-case';
 import { GetPropertyAnalyticsRankingUseCase } from './application/use-cases/get-property-analytics-ranking/get-property-analytics-ranking.use-case';
 import { GetPropertyAnalyticsDeviceBreakdownUseCase } from './application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.use-case';
+import { GetPropertyAnalyticsBenchmarkUseCase } from './application/use-cases/get-property-analytics-benchmark/get-property-analytics-benchmark.use-case';
+import { GetPropertyAnalyticsExportDataUseCase } from './application/use-cases/get-property-analytics-export-data/get-property-analytics-export-data.use-case';
+import { CheckNoContactsAlertsUseCase } from './application/use-cases/check-no-contacts-alerts/check-no-contacts-alerts.use-case';
+import { NoContactsAlertTask } from './application/tasks/no-contacts-alert.task';
+import { PropertyAnalyticsCsvSerializer } from './presentation/http/serializers/property-analytics-csv.serializer';
+import { PropertyAnalyticsPdfSerializer } from './presentation/http/serializers/property-analytics-pdf.serializer';
 import { AnalyticsController } from './presentation/http/analytics.controller';
 
 @Module({
@@ -23,7 +30,7 @@ import { AnalyticsController } from './presentation/http/analytics.controller';
   // is instead re-provided locally below — same pattern properties.module.ts
   // already uses for itself (a second stateless wrapper over the @Global()
   // PrismaService is harmless).
-  imports: [AuthModule, PlansModule],
+  imports: [AuthModule, PlansModule, NotificationsModule],
   controllers: [AnalyticsController],
   providers: [
     { provide: PropertyRepository, useClass: PrismaPropertyRepository },
@@ -40,6 +47,12 @@ import { AnalyticsController } from './presentation/http/analytics.controller';
     GetPropertyAnalyticsTrendUseCase,
     GetPropertyAnalyticsRankingUseCase,
     GetPropertyAnalyticsDeviceBreakdownUseCase,
+    GetPropertyAnalyticsBenchmarkUseCase,
+    GetPropertyAnalyticsExportDataUseCase,
+    CheckNoContactsAlertsUseCase,
+    NoContactsAlertTask,
+    PropertyAnalyticsCsvSerializer,
+    PropertyAnalyticsPdfSerializer,
   ],
   // RecordAnalyticsEventUseCase is the one-line instrumentation hook
   // consumed by properties (reveal-contact) and messaging (start-conversation).

@@ -1,7 +1,7 @@
-import { Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { Public } from '../../../../shared/presentation/decorators/public.decorator';
 import { Roles } from '../../../../shared/presentation/decorators/roles.decorator';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
@@ -19,11 +19,19 @@ import { GetPropertyAnalyticsRankingUseCase } from '../../application/use-cases/
 import { GetPropertyAnalyticsRankingQuery } from '../../application/use-cases/get-property-analytics-ranking/get-property-analytics-ranking.query';
 import { GetPropertyAnalyticsDeviceBreakdownUseCase } from '../../application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.use-case';
 import { GetPropertyAnalyticsDeviceBreakdownCommand } from '../../application/use-cases/get-property-analytics-device-breakdown/get-property-analytics-device-breakdown.command';
+import { GetPropertyAnalyticsBenchmarkUseCase } from '../../application/use-cases/get-property-analytics-benchmark/get-property-analytics-benchmark.use-case';
+import { GetPropertyAnalyticsBenchmarkCommand } from '../../application/use-cases/get-property-analytics-benchmark/get-property-analytics-benchmark.command';
+import { GetPropertyAnalyticsExportDataUseCase } from '../../application/use-cases/get-property-analytics-export-data/get-property-analytics-export-data.use-case';
+import { GetPropertyAnalyticsExportDataCommand } from '../../application/use-cases/get-property-analytics-export-data/get-property-analytics-export-data.command';
 import { DeviceTypeParser } from '../../infrastructure/parsing/device-type.parser';
+import { PropertyAnalyticsCsvSerializer } from './serializers/property-analytics-csv.serializer';
+import { PropertyAnalyticsPdfSerializer } from './serializers/property-analytics-pdf.serializer';
 import { PropertyAnalyticsSummaryResponseDto } from './dto/property-analytics-summary-response.dto';
 import { PropertyAnalyticsTrendPointResponseDto } from './dto/property-analytics-trend-point-response.dto';
 import { PropertyAnalyticsRankingEntryResponseDto } from './dto/property-analytics-ranking-entry-response.dto';
 import { PropertyAnalyticsDeviceBreakdownEntryResponseDto } from './dto/property-analytics-device-breakdown-entry-response.dto';
+import { PropertyAnalyticsBenchmarkResponseDto } from './dto/property-analytics-benchmark-response.dto';
+import { ExportPropertyAnalyticsQueryDto } from './dto/export-property-analytics-query.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -35,7 +43,11 @@ export class AnalyticsController {
     private readonly getPropertyAnalyticsTrendUseCase: GetPropertyAnalyticsTrendUseCase,
     private readonly getPropertyAnalyticsRankingUseCase: GetPropertyAnalyticsRankingUseCase,
     private readonly getPropertyAnalyticsDeviceBreakdownUseCase: GetPropertyAnalyticsDeviceBreakdownUseCase,
+    private readonly getPropertyAnalyticsBenchmarkUseCase: GetPropertyAnalyticsBenchmarkUseCase,
+    private readonly getPropertyAnalyticsExportDataUseCase: GetPropertyAnalyticsExportDataUseCase,
     private readonly deviceTypeParser: DeviceTypeParser,
+    private readonly csvSerializer: PropertyAnalyticsCsvSerializer,
+    private readonly pdfSerializer: PropertyAnalyticsPdfSerializer,
   ) {}
 
   @ApiOperation({
@@ -127,5 +139,51 @@ export class AnalyticsController {
     return this.getPropertyAnalyticsDeviceBreakdownUseCase.execute(
       new GetPropertyAnalyticsDeviceBreakdownCommand(id, user.id),
     );
+  }
+
+  @ApiOperation({
+    summary:
+      "A single property's views/contacts benchmarked against comparable listings (same state+type+operationType, AVAILABLE, excluding the caller's own properties). ADMIN only, must own the property, requires BUSINESS+. `available: false` when fewer than 5 comparable listings exist.",
+  })
+  @Roles(Role.ADMIN)
+  @Get('properties/:id/benchmark')
+  async getPropertyBenchmark(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<PropertyAnalyticsBenchmarkResponseDto> {
+    return this.getPropertyAnalyticsBenchmarkUseCase.execute(
+      new GetPropertyAnalyticsBenchmarkCommand(id, user.id),
+    );
+  }
+
+  @ApiOperation({
+    summary:
+      "Exports a single property's analytics summary as CSV or PDF (ADMIN only, must own the property, requires BUSINESS+). `format` query param must be 'csv' or 'pdf'.",
+  })
+  @Roles(Role.ADMIN)
+  @Get('properties/:id/export')
+  async exportPropertyAnalytics(
+    @Param('id') id: string,
+    @Query() query: ExportPropertyAnalyticsQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<string | Buffer> {
+    const data = await this.getPropertyAnalyticsExportDataUseCase.execute(
+      new GetPropertyAnalyticsExportDataCommand(id, user.id),
+    );
+
+    if (query.format === 'csv') {
+      res.set({
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="property-analytics-${id}.csv"`,
+      });
+      return this.csvSerializer.serialize(data);
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="property-analytics-${id}.pdf"`,
+    });
+    return this.pdfSerializer.serialize(data);
   }
 }

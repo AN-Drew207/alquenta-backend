@@ -15,6 +15,9 @@ export class NotificationResponseDto {
   @ApiProperty({ required: false, nullable: true })
   conversationId: string | null;
 
+  @ApiProperty({ required: false, nullable: true })
+  propertyId: string | null;
+
   @ApiProperty()
   text: string;
 

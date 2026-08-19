@@ -19,6 +19,8 @@ export class CreateNotificationUseCase implements UseCase<
       type: command.type,
       text: command.text,
       messageId: command.messageId,
+      conversationId: command.conversationId,
+      propertyId: command.propertyId,
     });
 
     await this.notificationRepository.save(notification);

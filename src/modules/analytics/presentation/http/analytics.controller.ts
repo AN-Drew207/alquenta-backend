@@ -32,6 +32,7 @@ import { PropertyAnalyticsRankingEntryResponseDto } from './dto/property-analyti
 import { PropertyAnalyticsDeviceBreakdownEntryResponseDto } from './dto/property-analytics-device-breakdown-entry-response.dto';
 import { PropertyAnalyticsBenchmarkResponseDto } from './dto/property-analytics-benchmark-response.dto';
 import { ExportPropertyAnalyticsQueryDto } from './dto/export-property-analytics-query.dto';
+import { PortfolioAnalyticsSummaryQueryDto } from './dto/portfolio-analytics-summary-query.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -85,15 +86,24 @@ export class AnalyticsController {
 
   @ApiOperation({
     summary:
-      "The authenticated admin's analytics summary aggregated across their whole portfolio (ADMIN only, requires an assigned plan).",
+      "The authenticated admin's analytics summary aggregated across their whole portfolio (ADMIN only, requires an assigned plan). With no query params, requires STARTER+ and aggregates every property over all time. Any filter param (type/operationType/state/status/from/to) requires ENTERPRISE — type/operationType/state/status narrow WHICH properties are included, from/to narrow WHICH analytics events count (by occurredAt).",
   })
   @Roles(Role.ADMIN)
   @Get('summary')
   async getPortfolioSummary(
+    @Query() query: PortfolioAnalyticsSummaryQueryDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<PropertyAnalyticsSummaryResponseDto> {
     return this.getPortfolioAnalyticsSummaryUseCase.execute(
-      new GetPortfolioAnalyticsSummaryQuery(user.id),
+      new GetPortfolioAnalyticsSummaryQuery(
+        user.id,
+        query.type,
+        query.operationType,
+        query.state,
+        query.status,
+        query.from ? new Date(query.from) : undefined,
+        query.to ? new Date(query.to) : undefined,
+      ),
     );
   }
 

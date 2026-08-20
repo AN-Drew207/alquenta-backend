@@ -9,6 +9,7 @@ import {
   PropertyAnalyticsDailyCount,
   PropertyAnalyticsDeviceCount,
   PropertyAnalyticsEventCount,
+  PropertyAnalyticsEventDateRange,
   PropertyAnalyticsEventRepository,
 } from '../../domain/repositories/property-analytics-event.repository';
 import { PropertyAnalyticsEventMapper } from './property-analytics-event.mapper';
@@ -48,11 +49,22 @@ export class PrismaPropertyAnalyticsEventRepository implements PropertyAnalytics
 
   async countManyByPropertyAndType(
     propertyIds: string[],
+    dateRange?: PropertyAnalyticsEventDateRange,
   ): Promise<PropertyAnalyticsEventCount[]> {
     if (propertyIds.length === 0) return [];
+    const hasDateRange =
+      dateRange?.since !== undefined || dateRange?.until !== undefined;
     const rows = await this.prisma.propertyAnalyticsEvent.groupBy({
       by: ['propertyId', 'type'],
-      where: { propertyId: { in: propertyIds } },
+      where: {
+        propertyId: { in: propertyIds },
+        ...(hasDateRange && {
+          occurredAt: {
+            ...(dateRange?.since !== undefined && { gte: dateRange.since }),
+            ...(dateRange?.until !== undefined && { lte: dateRange.until }),
+          },
+        }),
+      },
       _count: { _all: true },
     });
     return rows.map((row) => ({

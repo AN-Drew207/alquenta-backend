@@ -98,6 +98,9 @@ describe('Analytics (e2e)', () => {
   let alertNoContactsPropertyId: string;
   let alertWithContactPropertyId: string;
 
+  // Fase 4 fixtures
+  let enterpriseHousePropertyId: string;
+
   const starterAdminEmail = 'starter-admin@e2e-analytics.test';
   const noPlanAdminEmail = 'no-plan-admin@e2e-analytics.test';
   const otherAdminEmail = 'other-admin@e2e-analytics.test';
@@ -371,11 +374,54 @@ describe('Analytics (e2e)', () => {
       type: 'WHATSAPP_REVEAL',
       occurredAt: new Date(),
     });
+
+    // --- Fase 4 fixtures ---
+    // A second ENTERPRISE-owned property of a different type (HOUSE, vs
+    // enterprisePropertyId's APARTMENT) — the type-filter tests below
+    // prove the aggregate narrows to matching properties only. Its own
+    // events are never touched again outside this block, so they can't
+    // regress enterprisePropertyId's full-history trend assertion above.
+    const enterpriseHouseRes = await request(app.getHttpServer())
+      .post('/api/properties')
+      .set('Cookie', enterpriseAdminCookie)
+      .send({
+        title: 'Enterprise Filter House Property',
+        description: 'desc',
+        address: 'addr',
+        state: 'Miranda',
+        municipality: 'Baruta',
+        type: 'HOUSE',
+        operationType: 'RENT',
+        price: 500,
+        images: ['https://example.com/photo.jpg'],
+        whatsapp: '+58 412 1234567',
+      });
+    enterpriseHousePropertyId = (enterpriseHouseRes.body as { id: string }).id;
+
+    // Fixed-timestamp events for the date-range filter tests: one VIEW +
+    // one WHATSAPP_REVEAL inside the last 10 days, one VIEW well outside it.
+    await seedAnalyticsEvent(prisma, {
+      propertyId: enterpriseHousePropertyId,
+      type: 'VIEW',
+      occurredAt: daysAgo(3),
+    });
+    await seedAnalyticsEvent(prisma, {
+      propertyId: enterpriseHousePropertyId,
+      type: 'WHATSAPP_REVEAL',
+      occurredAt: daysAgo(3),
+    });
+    await seedAnalyticsEvent(prisma, {
+      propertyId: enterpriseHousePropertyId,
+      type: 'VIEW',
+      occurredAt: daysAgo(50),
+    });
     // Fase 3 added several more sequential property-creation round trips to
     // this hook (on top of Fase 1/2's), which occasionally pushes it past
     // the default 20s test/hook timeout against real Neon — bump this
-    // specific hook rather than the shared jest-e2e.json config.
-  }, 40_000);
+    // specific hook rather than the shared jest-e2e.json config. Fase 4
+    // added one more property + three more direct event inserts, which
+    // pushed the previous 40s budget too close for comfort — bumped again.
+  }, 60_000);
 
   afterAll(async () => {
     const users = await prisma.user.findMany({
@@ -483,6 +529,84 @@ describe('Analytics (e2e)', () => {
       totalViews: 1,
       totalContacts: 2,
       conversionRate: 2,
+    });
+  });
+
+  it('rejects a portfolio summary filter (type) for a STARTER admin', () => {
+    return request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ type: 'APARTMENT' })
+      .set('Cookie', starterAdminCookie)
+      .expect(403);
+  });
+
+  it('rejects a portfolio summary filter (type) for a PROFESSIONAL admin', () => {
+    return request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ type: 'APARTMENT' })
+      .set('Cookie', professionalAdminCookie)
+      .expect(403);
+  });
+
+  it('rejects a portfolio summary filter (type) for a BUSINESS admin', () => {
+    return request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ type: 'APARTMENT' })
+      .set('Cookie', businessAdminCookie)
+      .expect(403);
+  });
+
+  it('portfolio summary type filter for an ENTERPRISE admin with mixed property types only reflects matching properties', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ type: 'APARTMENT' })
+      .set('Cookie', enterpriseAdminCookie)
+      .expect(200);
+
+    // enterprisePropertyId (APARTMENT) has 4 VIEW events (day-5/20/40/100,
+    // the same full-history fixture the trend test above asserts on);
+    // enterpriseHousePropertyId (HOUSE) is excluded by the type filter even
+    // though it has its own events.
+    expect(res.body).toMatchObject({
+      totalViews: 4,
+      totalContacts: 0,
+      conversionRate: 0,
+    });
+  });
+
+  it('portfolio summary date-range filter for an ENTERPRISE admin only counts in-range events', async () => {
+    const from = daysAgo(10).toISOString();
+    const res = await request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ from })
+      .set('Cookie', enterpriseAdminCookie)
+      .expect(200);
+
+    // Within the last 10 days: enterprisePropertyId's day-5 VIEW, plus
+    // enterpriseHousePropertyId's day-3 VIEW and day-3 WHATSAPP_REVEAL.
+    // Excluded: day-20/40/100 (enterprisePropertyId) and day-50
+    // (enterpriseHousePropertyId).
+    expect(res.body).toMatchObject({
+      totalViews: 2,
+      totalContacts: 1,
+      conversionRate: 0.5,
+    });
+  });
+
+  it('portfolio summary combines a property-level filter and a date-range filter', async () => {
+    const from = daysAgo(10).toISOString();
+    const res = await request(app.getHttpServer())
+      .get('/api/analytics/summary')
+      .query({ type: 'HOUSE', from })
+      .set('Cookie', enterpriseAdminCookie)
+      .expect(200);
+
+    // Only enterpriseHousePropertyId matches type=HOUSE, and only its
+    // day-3 events fall within the last 10 days (day-50 excluded).
+    expect(res.body).toMatchObject({
+      totalViews: 1,
+      totalContacts: 1,
+      conversionRate: 1,
     });
   });
 

@@ -20,6 +20,16 @@ export interface PropertyAnalyticsDeviceCount {
   count: number;
 }
 
+/**
+ * Optional `occurredAt` window for countManyByPropertyAndType — Fase 4's
+ * ENTERPRISE-only date-range filter on the portfolio summary. Both bounds
+ * inclusive, either or both may be omitted.
+ */
+export interface PropertyAnalyticsEventDateRange {
+  since?: Date;
+  until?: Date;
+}
+
 export abstract class PropertyAnalyticsEventRepository {
   abstract save(
     event: PropertyAnalyticsEvent,
@@ -31,10 +41,14 @@ export abstract class PropertyAnalyticsEventRepository {
   ): Promise<number>;
   /**
    * Batched: one grouped query for many properties at once (an admin's
-   * whole portfolio), rather than N per-property queries.
+   * whole portfolio), rather than N per-property queries. `dateRange`
+   * (optional) narrows to events whose `occurredAt` falls within it —
+   * omitted by every Fase 1-3 call site, only GetPortfolioAnalyticsSummaryUseCase's
+   * Fase 4 ENTERPRISE date-range filter passes one.
    */
   abstract countManyByPropertyAndType(
     propertyIds: string[],
+    dateRange?: PropertyAnalyticsEventDateRange,
   ): Promise<PropertyAnalyticsEventCount[]>;
   /**
    * Daily-bucketed view/contact counts for one property, from `since`

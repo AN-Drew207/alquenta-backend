@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { PropertiesModule } from '../properties/properties.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { ConversationRepository } from './domain/repositories/conversation.repository';
 import { MessageRepository } from './domain/repositories/message.repository';
 import { PrismaConversationRepository } from './infrastructure/persistence/prisma-conversation.repository';
@@ -14,7 +15,7 @@ import { GetAdminResponseStatsUseCase } from './application/use-cases/get-admin-
 import { ConversationsController } from './presentation/http/conversations.controller';
 
 @Module({
-  imports: [AuthModule, PropertiesModule, NotificationsModule],
+  imports: [AuthModule, PropertiesModule, NotificationsModule, AnalyticsModule],
   controllers: [ConversationsController],
   providers: [
     { provide: ConversationRepository, useClass: PrismaConversationRepository },

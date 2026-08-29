@@ -56,7 +56,9 @@ export class AccountController {
   async listSessions(
     @CurrentUser() authenticatedUser: AuthenticatedUser,
   ): Promise<SessionResponseDto[]> {
-    const sessions = await this.sessionRepository.findByUserId(authenticatedUser.id);
+    const sessions = await this.sessionRepository.findByUserId(
+      authenticatedUser.id,
+    );
     return sessions
       .map((session) => ({
         id: session.id,

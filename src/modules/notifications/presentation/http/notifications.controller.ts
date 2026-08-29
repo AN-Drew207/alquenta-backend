@@ -16,7 +16,7 @@ export class NotificationsController {
     private readonly markAsReadUseCase: MarkNotificationAsReadUseCase,
   ) {}
 
-  @ApiOperation({ summary: 'List the authenticated user\'s own notifications' })
+  @ApiOperation({ summary: "List the authenticated user's own notifications" })
   @Get()
   async listMine(
     @CurrentUser() user: AuthenticatedUser,
@@ -24,10 +24,12 @@ export class NotificationsController {
     const notifications = await this.listMyNotificationsUseCase.execute(
       user.id,
     );
-    return notifications.map(NotificationResponseMapper.toDto);
+    return notifications.map((notification) =>
+      NotificationResponseMapper.toDto(notification),
+    );
   }
 
-  @ApiOperation({ summary: 'Mark one of the user\'s own notifications as read' })
+  @ApiOperation({ summary: "Mark one of the user's own notifications as read" })
   @Patch(':id/read')
   async markAsRead(
     @Param('id') id: string,

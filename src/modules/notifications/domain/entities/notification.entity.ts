@@ -9,6 +9,7 @@ export class Notification {
     private readonly _type: NotificationType,
     private readonly _messageId: string | null,
     private readonly _conversationId: string | null,
+    private readonly _propertyId: string | null,
     private readonly _text: string,
     private _status: NotificationStatus,
     private readonly _createdAt: Date,
@@ -20,6 +21,7 @@ export class Notification {
     text: string;
     messageId?: string | null;
     conversationId?: string | null;
+    propertyId?: string | null;
   }): Notification {
     return new Notification(
       randomUUID(),
@@ -27,6 +29,7 @@ export class Notification {
       params.type,
       params.messageId ?? null,
       params.conversationId ?? null,
+      params.propertyId ?? null,
       params.text,
       NotificationStatus.PENDING,
       new Date(),
@@ -39,6 +42,7 @@ export class Notification {
     type: NotificationType;
     messageId: string | null;
     conversationId: string | null;
+    propertyId: string | null;
     text: string;
     status: NotificationStatus;
     createdAt: Date;
@@ -49,6 +53,7 @@ export class Notification {
       params.type,
       params.messageId,
       params.conversationId,
+      params.propertyId,
       params.text,
       params.status,
       params.createdAt,
@@ -81,6 +86,10 @@ export class Notification {
 
   get conversationId(): string | null {
     return this._conversationId;
+  }
+
+  get propertyId(): string | null {
+    return this._propertyId;
   }
 
   get text(): string {

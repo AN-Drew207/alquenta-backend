@@ -7,9 +7,10 @@ import { NotificationNotOwnedByUserException } from '../../../domain/exceptions/
 import { MarkNotificationAsReadCommand } from './mark-notification-as-read.command';
 
 @Injectable()
-export class MarkNotificationAsReadUseCase
-  implements UseCase<MarkNotificationAsReadCommand, Notification>
-{
+export class MarkNotificationAsReadUseCase implements UseCase<
+  MarkNotificationAsReadCommand,
+  Notification
+> {
   constructor(
     private readonly notificationRepository: NotificationRepository,
   ) {}

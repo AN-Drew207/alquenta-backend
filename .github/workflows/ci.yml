@@ -29,6 +29,8 @@ jobs:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
       FRONT_URL: http://localhost:3000
       JWT_SECRET: ci-only-secret-not-used-anywhere-real
+      RESEND_API_KEY: re_ci_test_key_not_real
+      EMAIL_FROM: ci@example.com
 
     steps:
       - name: Checkout

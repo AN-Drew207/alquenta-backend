@@ -8,15 +8,14 @@ import { CancelPropertyCommand } from './cancel-property.command';
 
 /** Superadmin oversight action: cancels any admin's listing regardless of ownership. */
 @Injectable()
-export class CancelPropertyUseCase
-  implements UseCase<CancelPropertyCommand, Property>
-{
+export class CancelPropertyUseCase implements UseCase<
+  CancelPropertyCommand,
+  Property
+> {
   constructor(private readonly propertyRepository: PropertyRepository) {}
 
   async execute(command: CancelPropertyCommand): Promise<Property> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }

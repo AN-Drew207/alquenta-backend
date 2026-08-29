@@ -8,9 +8,10 @@ import { NotConversationParticipantException } from '../../../domain/exceptions/
 import { ListConversationMessagesQuery } from './list-conversation-messages.query';
 
 @Injectable()
-export class ListConversationMessagesUseCase
-  implements UseCase<ListConversationMessagesQuery, Message[]>
-{
+export class ListConversationMessagesUseCase implements UseCase<
+  ListConversationMessagesQuery,
+  Message[]
+> {
   constructor(
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,

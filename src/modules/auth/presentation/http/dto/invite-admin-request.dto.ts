@@ -6,7 +6,9 @@ export class InviteAdminRequestDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ description: 'Id of the Plan to assign once the invite is accepted' })
+  @ApiProperty({
+    description: 'Id of the Plan to assign once the invite is accepted',
+  })
   @IsUUID()
   planId: string;
 }

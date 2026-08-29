@@ -5,9 +5,10 @@ import { NotificationRepository } from '../../../domain/repositories/notificatio
 import { CreateNotificationCommand } from './create-notification.command';
 
 @Injectable()
-export class CreateNotificationUseCase
-  implements UseCase<CreateNotificationCommand, Notification>
-{
+export class CreateNotificationUseCase implements UseCase<
+  CreateNotificationCommand,
+  Notification
+> {
   constructor(
     private readonly notificationRepository: NotificationRepository,
   ) {}
@@ -18,6 +19,8 @@ export class CreateNotificationUseCase
       type: command.type,
       text: command.text,
       messageId: command.messageId,
+      conversationId: command.conversationId,
+      propertyId: command.propertyId,
     });
 
     await this.notificationRepository.save(notification);

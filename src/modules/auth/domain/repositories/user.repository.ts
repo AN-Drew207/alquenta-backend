@@ -8,5 +8,6 @@ export abstract class UserRepository {
   abstract findById(id: string): Promise<User | null>;
   abstract findByUsername(username: string): Promise<User | null>;
   abstract findManyByRole(role: Role): Promise<User[]>;
+  abstract findManyByParentAdminId(parentAdminId: string): Promise<User[]>;
   abstract delete(id: string): Promise<void>;
 }

@@ -6,9 +6,10 @@ import { UserRepository } from '../../../domain/repositories/user.repository';
 import { UnverifyAdminCommand } from './unverify-admin.command';
 
 @Injectable()
-export class UnverifyAdminUseCase
-  implements UseCase<UnverifyAdminCommand, void>
-{
+export class UnverifyAdminUseCase implements UseCase<
+  UnverifyAdminCommand,
+  void
+> {
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(command: UnverifyAdminCommand): Promise<void> {

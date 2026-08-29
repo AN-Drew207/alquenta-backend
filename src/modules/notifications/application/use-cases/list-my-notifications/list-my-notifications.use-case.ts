@@ -4,9 +4,10 @@ import { Notification } from '../../../domain/entities/notification.entity';
 import { NotificationRepository } from '../../../domain/repositories/notification.repository';
 
 @Injectable()
-export class ListMyNotificationsUseCase
-  implements UseCase<string, Notification[]>
-{
+export class ListMyNotificationsUseCase implements UseCase<
+  string,
+  Notification[]
+> {
   constructor(
     private readonly notificationRepository: NotificationRepository,
   ) {}

@@ -1,9 +1,11 @@
 import { PropertyType } from '../../../domain/enums/property-type.enum';
 import { OperationType } from '../../../domain/enums/operation-type.enum';
+import { Role } from '../../../../../shared/domain/role.enum';
 
 export class PublishPropertyCommand {
   constructor(
-    readonly adminId: string,
+    readonly userId: string,
+    readonly role: Role,
     readonly title: string,
     readonly description: string,
     readonly address: string,
@@ -21,5 +23,6 @@ export class PublishPropertyCommand {
     readonly whatsapp?: string,
     readonly latitude?: number,
     readonly longitude?: number,
+    readonly agentId?: string | null,
   ) {}
 }

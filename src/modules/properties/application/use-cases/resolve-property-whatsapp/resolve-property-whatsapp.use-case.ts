@@ -11,9 +11,10 @@ import { UserRepository } from '../../../../auth/domain/repositories/user.reposi
  * endpoint (to fetch the real value after the token checks out).
  */
 @Injectable()
-export class ResolvePropertyWhatsappUseCase
-  implements UseCase<string, string | null>
-{
+export class ResolvePropertyWhatsappUseCase implements UseCase<
+  string,
+  string | null
+> {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly userRepository: UserRepository,

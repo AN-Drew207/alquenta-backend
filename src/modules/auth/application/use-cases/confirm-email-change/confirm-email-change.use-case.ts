@@ -28,7 +28,9 @@ export class ConfirmEmailChangeUseCase implements UseCase<string, User> {
     }
 
     if (payload.purpose !== 'email-change') {
-      throw new InvalidVerificationTokenException('This confirmation link is invalid.');
+      throw new InvalidVerificationTokenException(
+        'This confirmation link is invalid.',
+      );
     }
 
     const user = await this.userRepository.findById(payload.sub);

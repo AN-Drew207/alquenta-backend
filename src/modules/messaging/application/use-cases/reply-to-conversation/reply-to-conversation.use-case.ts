@@ -14,9 +14,10 @@ import { NotConversationParticipantException } from '../../../domain/exceptions/
 import { ReplyToConversationCommand } from './reply-to-conversation.command';
 
 @Injectable()
-export class ReplyToConversationUseCase
-  implements UseCase<ReplyToConversationCommand, Message>
-{
+export class ReplyToConversationUseCase implements UseCase<
+  ReplyToConversationCommand,
+  Message
+> {
   private readonly logger = new Logger(ReplyToConversationUseCase.name);
 
   constructor(

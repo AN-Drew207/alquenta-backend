@@ -14,9 +14,10 @@ import { ReactivateAccountCommand } from './reactivate-account.command';
  * reactivated this way — only another superadmin can re-enable them.
  */
 @Injectable()
-export class ReactivateAccountUseCase
-  implements UseCase<ReactivateAccountCommand, User>
-{
+export class ReactivateAccountUseCase implements UseCase<
+  ReactivateAccountCommand,
+  User
+> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,

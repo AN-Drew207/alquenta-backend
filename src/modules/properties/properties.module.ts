@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { PlansModule } from '../plans/plans.module';
 import { MediaModule } from '../media/media.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { PropertyRepository } from './domain/repositories/property.repository';
 import { PrismaPropertyRepository } from './infrastructure/persistence/prisma-property.repository';
 import { PublishPropertyUseCase } from './application/use-cases/publish-property/publish-property.use-case';
@@ -18,7 +19,7 @@ import { CancelledPropertiesCleanupTask } from './application/tasks/cancelled-pr
 import { PropertiesController } from './presentation/http/properties.controller';
 
 @Module({
-  imports: [AuthModule, PlansModule, MediaModule],
+  imports: [AuthModule, PlansModule, MediaModule, AnalyticsModule],
   controllers: [PropertiesController],
   providers: [
     { provide: PropertyRepository, useClass: PrismaPropertyRepository },

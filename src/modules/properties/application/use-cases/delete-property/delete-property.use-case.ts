@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { PropertyRepository } from '../../../domain/repositories/property.repository';
 import { PropertyNotOwnedByAdminException } from '../../../domain/exceptions/property-not-owned-by-admin.exception';
@@ -9,22 +10,26 @@ import { MediaService } from '../../../../media/media.service';
 import { DeletePropertyCommand } from './delete-property.command';
 
 @Injectable()
-export class DeletePropertyUseCase
-  implements UseCase<DeletePropertyCommand, void>
-{
+export class DeletePropertyUseCase implements UseCase<
+  DeletePropertyCommand,
+  void
+> {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly mediaService: MediaService,
   ) {}
 
   async execute(command: DeletePropertyCommand): Promise<void> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }
-    if (!property.belongsTo(command.adminId)) {
+
+    const isOwner =
+      command.role === Role.AGENT
+        ? property.managedByAgent(command.adminId)
+        : property.belongsTo(command.adminId);
+    if (!isOwner) {
       throw new PropertyNotOwnedByAdminException(command.propertyId);
     }
     if (property.status !== PropertyStatus.CANCELLED) {

@@ -2,6 +2,8 @@ import { DomainForbiddenException } from '../../../../shared/domain/exceptions/d
 
 export class NotConversationParticipantException extends DomainForbiddenException {
   constructor(conversationId: string) {
-    super(`The authenticated user is not a participant of conversation "${conversationId}"`);
+    super(
+      `The authenticated user is not a participant of conversation "${conversationId}"`,
+    );
   }
 }

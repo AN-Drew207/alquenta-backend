@@ -23,7 +23,9 @@ export class FavoritesController {
     private readonly listFavoriteIdsUseCase: ListFavoriteIdsUseCase,
   ) {}
 
-  @ApiOperation({ summary: "List the authenticated user's favorited properties" })
+  @ApiOperation({
+    summary: "List the authenticated user's favorited properties",
+  })
   @Get()
   async list(
     @CurrentUser() user: AuthenticatedUser,
@@ -38,11 +40,13 @@ export class FavoritesController {
 
   @ApiOperation({
     summary:
-      "Just the property ids the authenticated user favorited — for hydrating heart-icon state elsewhere without refetching full property payloads",
+      'Just the property ids the authenticated user favorited — for hydrating heart-icon state elsewhere without refetching full property payloads',
   })
   @Get('ids')
   async listIds(@CurrentUser() user: AuthenticatedUser): Promise<string[]> {
-    return this.listFavoriteIdsUseCase.execute(new ListFavoriteIdsQuery(user.id));
+    return this.listFavoriteIdsUseCase.execute(
+      new ListFavoriteIdsQuery(user.id),
+    );
   }
 
   @ApiOperation({ summary: 'Favorite a property (idempotent)' })
@@ -52,7 +56,9 @@ export class FavoritesController {
     @Param('propertyId') propertyId: string,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    await this.addFavoriteUseCase.execute(new AddFavoriteCommand(user.id, propertyId));
+    await this.addFavoriteUseCase.execute(
+      new AddFavoriteCommand(user.id, propertyId),
+    );
   }
 
   @ApiOperation({ summary: 'Unfavorite a property (idempotent)' })

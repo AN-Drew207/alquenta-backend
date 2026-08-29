@@ -4,13 +4,17 @@ import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.s
 import { TransactionContext } from '../../../../shared/domain/transaction/transaction-context';
 import { Notification } from '../../domain/entities/notification.entity';
 import { NotificationRepository } from '../../domain/repositories/notification.repository';
+import { NotificationType } from '../../domain/enums/notification-type.enum';
 import { NotificationMapper } from './notification.mapper';
 
 @Injectable()
 export class PrismaNotificationRepository implements NotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(notification: Notification, ctx?: TransactionContext): Promise<void> {
+  async save(
+    notification: Notification,
+    ctx?: TransactionContext,
+  ): Promise<void> {
     const client = (ctx as Prisma.TransactionClient | undefined) ?? this.prisma;
     const data = NotificationMapper.toPersistence(notification);
     await client.notification.upsert({
@@ -30,6 +34,18 @@ export class PrismaNotificationRepository implements NotificationRepository {
       where: { recipientUserId },
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map(NotificationMapper.toDomain);
+    return rows.map((row) => NotificationMapper.toDomain(row));
+  }
+
+  async existsRecentByPropertyAndType(
+    propertyId: string,
+    type: NotificationType,
+    since: Date,
+  ): Promise<boolean> {
+    const match = await this.prisma.notification.findFirst({
+      where: { propertyId, type, createdAt: { gte: since } },
+      select: { id: true },
+    });
+    return match !== null;
   }
 }

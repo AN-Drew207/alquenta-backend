@@ -12,9 +12,12 @@ export class CancelledPropertiesCleanupTask {
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleCron(): Promise<void> {
-    const deletedCount = await this.purgeStaleCancelledPropertiesUseCase.execute();
+    const deletedCount =
+      await this.purgeStaleCancelledPropertiesUseCase.execute();
     if (deletedCount > 0) {
-      this.logger.log(`Purged ${deletedCount} cancelled listing(s) past the retention window`);
+      this.logger.log(
+        `Purged ${deletedCount} cancelled listing(s) past the retention window`,
+      );
     }
   }
 }

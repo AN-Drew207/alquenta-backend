@@ -1,0 +1,11 @@
+-- Hand-written, same reason as 20260814120000_add_first_last_name_and_rename_show_whatsapp.
+--
+-- The next migration (20260817110622_add_conversation_relation_to_notification)
+-- only adds the FK constraint on "Notification"."conversationId", assuming the
+-- column already exists via the dev database's pre-existing untracked drift.
+-- That assumption does not hold on any database bootstrapped purely from this
+-- migration history (CI, a fresh production database) — the column was never
+-- created by a tracked migration. `IF NOT EXISTS` makes this a no-op on the
+-- dev database (where the column already exists) and creates it everywhere
+-- else, so the following migration's `ADD CONSTRAINT` can succeed uniformly.
+ALTER TABLE "Notification" ADD COLUMN IF NOT EXISTS "conversationId" TEXT;

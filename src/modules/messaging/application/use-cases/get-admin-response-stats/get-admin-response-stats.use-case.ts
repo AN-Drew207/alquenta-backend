@@ -6,9 +6,10 @@ import { AdminResponseStats } from './admin-response-stats';
 import { GetAdminResponseStatsQuery } from './get-admin-response-stats.query';
 
 @Injectable()
-export class GetAdminResponseStatsUseCase
-  implements UseCase<GetAdminResponseStatsQuery, AdminResponseStats>
-{
+export class GetAdminResponseStatsUseCase implements UseCase<
+  GetAdminResponseStatsQuery,
+  AdminResponseStats
+> {
   constructor(
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,

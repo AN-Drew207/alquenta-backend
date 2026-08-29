@@ -15,7 +15,7 @@ export class MediaController {
 
   @ApiOperation({
     summary:
-      'Get a signed Cloudinary upload signature — the file is uploaded directly from the browser to Cloudinary, never through this API. Property uploads require ADMIN; avatar uploads are open to any authenticated user.',
+      'Get a signed Cloudinary upload signature — the file is uploaded directly from the browser to Cloudinary, never through this API. Property uploads require ADMIN or AGENT; avatar uploads are open to any authenticated user.',
   })
   @Post('signature')
   createSignature(
@@ -23,7 +23,11 @@ export class MediaController {
     @CurrentUser() user: AuthenticatedUser,
   ): MediaSignatureResponseDto {
     const target = dto.target ?? 'property';
-    if (target === 'property' && user.role !== Role.ADMIN) {
+    if (
+      target === 'property' &&
+      user.role !== Role.ADMIN &&
+      user.role !== Role.AGENT
+    ) {
       throw new AdminRequiredForPropertyMediaException();
     }
 

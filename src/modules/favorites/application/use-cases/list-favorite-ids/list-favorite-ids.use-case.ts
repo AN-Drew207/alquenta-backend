@@ -9,9 +9,10 @@ import { ListFavoriteIdsQuery } from './list-favorite-ids.query';
  * property payloads a second time.
  */
 @Injectable()
-export class ListFavoriteIdsUseCase
-  implements UseCase<ListFavoriteIdsQuery, string[]>
-{
+export class ListFavoriteIdsUseCase implements UseCase<
+  ListFavoriteIdsQuery,
+  string[]
+> {
   constructor(private readonly favoriteRepository: FavoriteRepository) {}
 
   async execute(query: ListFavoriteIdsQuery): Promise<string[]> {

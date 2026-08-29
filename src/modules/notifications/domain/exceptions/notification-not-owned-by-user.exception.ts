@@ -2,6 +2,8 @@ import { DomainForbiddenException } from '../../../../shared/domain/exceptions/d
 
 export class NotificationNotOwnedByUserException extends DomainForbiddenException {
   constructor(notificationId: string) {
-    super(`Notification "${notificationId}" does not belong to the authenticated user`);
+    super(
+      `Notification "${notificationId}" does not belong to the authenticated user`,
+    );
   }
 }

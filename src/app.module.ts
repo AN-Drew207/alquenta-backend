@@ -17,6 +17,7 @@ import { MediaModule } from './modules/media/media.module';
 import { PlansModule } from './modules/plans/plans.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     MediaModule,
     FavoritesModule,
     ReportsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

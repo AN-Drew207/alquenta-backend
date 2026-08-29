@@ -2,6 +2,6 @@ import { DomainForbiddenException } from '../../../shared/domain/exceptions/doma
 
 export class AdminRequiredForPropertyMediaException extends DomainForbiddenException {
   constructor() {
-    super('Only admins can upload property media');
+    super('Only admins and agents can upload property media');
   }
 }

@@ -44,7 +44,7 @@ export class PrismaConversationRepository implements ConversationRepository {
       orderBy: { createdAt: 'desc' },
       include: { client: true, admin: true },
     });
-    return rows.map(ConversationMapper.toDomain);
+    return rows.map((row) => ConversationMapper.toDomain(row));
   }
 
   async findManyByAdminId(adminId: string): Promise<Conversation[]> {
@@ -52,6 +52,6 @@ export class PrismaConversationRepository implements ConversationRepository {
       where: { adminId },
       include: { client: true, admin: true },
     });
-    return rows.map(ConversationMapper.toDomain);
+    return rows.map((row) => ConversationMapper.toDomain(row));
   }
 }

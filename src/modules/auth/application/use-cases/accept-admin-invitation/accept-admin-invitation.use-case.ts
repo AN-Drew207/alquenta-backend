@@ -16,9 +16,10 @@ interface AdminInviteTokenPayload {
 }
 
 @Injectable()
-export class AcceptAdminInvitationUseCase
-  implements UseCase<AcceptAdminInvitationCommand, User>
-{
+export class AcceptAdminInvitationUseCase implements UseCase<
+  AcceptAdminInvitationCommand,
+  User
+> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,

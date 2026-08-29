@@ -2,6 +2,8 @@ import { DomainForbiddenException } from '../../../../shared/domain/exceptions/d
 
 export class PropertyNotOwnedByAdminException extends DomainForbiddenException {
   constructor(propertyId: string) {
-    super(`Property "${propertyId}" does not belong to the authenticated admin`);
+    super(
+      `Property "${propertyId}" does not belong to the authenticated admin`,
+    );
   }
 }

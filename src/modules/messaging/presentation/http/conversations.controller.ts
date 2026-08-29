@@ -82,7 +82,9 @@ export class ConversationsController {
     const conversations = await this.listMyConversationsUseCase.execute(
       user.id,
     );
-    return conversations.map(ConversationResponseMapper.toDto);
+    return conversations.map((conversation) =>
+      ConversationResponseMapper.toDto(conversation),
+    );
   }
 
   @ApiOperation({
@@ -96,11 +98,12 @@ export class ConversationsController {
     const messages = await this.listConversationMessagesUseCase.execute(
       new ListConversationMessagesQuery(id, user.id),
     );
-    return messages.map(MessageResponseMapper.toDto);
+    return messages.map((message) => MessageResponseMapper.toDto(message));
   }
 
   @ApiOperation({
-    summary: 'Reply on an existing conversation (either participant, client or admin)',
+    summary:
+      'Reply on an existing conversation (either participant, client or admin)',
   })
   @Post(':id/messages')
   async reply(

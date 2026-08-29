@@ -15,6 +15,7 @@ enum Role {
   ADMIN
   CLIENT
   SUPERADMIN
+  AGENT
 }
 
 enum PlanTier {
@@ -45,6 +46,7 @@ enum PropertyStatus {
 
 enum NotificationType {
   NEW_MESSAGE
+  ANALYTICS_ALERT
 }
 
 enum NotificationStatus {
@@ -70,6 +72,18 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum PropertyAnalyticsEventType {
+  VIEW
+  WHATSAPP_REVEAL
+  MESSAGE_STARTED
+}
+
+enum DeviceType {
+  MOBILE
+  DESKTOP
+  UNKNOWN
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -84,6 +98,9 @@ model User {
   accountType  AccountType @default(CLIENT)
   planId       String?
   plan         Plan?    @relation(fields: [planId], references: [id])
+  parentAdminId String?
+  parentAdmin  User?    @relation("AgencyAgents", fields: [parentAdminId], references: [id], onDelete: Cascade)
+  agents       User[]   @relation("AgencyAgents")
   avatarUrl    String?
   bio          String?
   city         String?
@@ -106,6 +123,7 @@ model User {
   updatedAt    DateTime @updatedAt
 
   properties               Property[]     @relation("AdminProperties")
+  agentProperties          Property[]     @relation("AgentProperties")
   conversationsAsClient    Conversation[] @relation("ClientConversations")
   conversationsAsAdmin     Conversation[] @relation("AdminConversations")
   messages                 Message[]      @relation("MessageAuthor")
@@ -131,6 +149,8 @@ model Property {
   id            String         @id @default(uuid())
   adminId       String
   admin         User           @relation("AdminProperties", fields: [adminId], references: [id], onDelete: Cascade)
+  agentId       String?
+  agent         User?          @relation("AgentProperties", fields: [agentId], references: [id], onDelete: SetNull)
   title         String
   description   String
   address       String
@@ -153,11 +173,14 @@ model Property {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  conversations Conversation[]
-  favoritedBy   Favorite[]
-  reports       Report[]
+  conversations   Conversation[]
+  favoritedBy     Favorite[]
+  reports         Report[]
+  analyticsEvents PropertyAnalyticsEvent[]
+  notifications   Notification[]
 
   @@index([status, type, state, municipality])
+  @@index([state, type, operationType, status])
 }
 
 model Conversation {
@@ -213,12 +236,15 @@ model Notification {
   message         Message?           @relation(fields: [messageId], references: [id], onDelete: Cascade)
   conversationId  String?
   conversation    Conversation?      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  propertyId      String?
+  property        Property?          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   text            String
   status          NotificationStatus @default(PENDING)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
   @@index([recipientUserId, status])
+  @@index([propertyId, type, createdAt])
 }
 
 model Favorite {
@@ -245,4 +271,15 @@ model Report {
   createdAt  DateTime     @default(now())
 
   @@index([status])
+}
+
+model PropertyAnalyticsEvent {
+  id         String                     @id @default(uuid())
+  propertyId String
+  property   Property                   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  type       PropertyAnalyticsEventType
+  deviceType DeviceType?
+  occurredAt DateTime                   @default(now())
+
+  @@index([propertyId, type, occurredAt])
 }

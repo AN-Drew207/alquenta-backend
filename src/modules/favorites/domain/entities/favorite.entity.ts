@@ -9,7 +9,12 @@ export class Favorite {
   ) {}
 
   static create(params: { userId: string; propertyId: string }): Favorite {
-    return new Favorite(randomUUID(), params.userId, params.propertyId, new Date());
+    return new Favorite(
+      randomUUID(),
+      params.userId,
+      params.propertyId,
+      new Date(),
+    );
   }
 
   static reconstitute(params: {
@@ -18,7 +23,12 @@ export class Favorite {
     propertyId: string;
     createdAt: Date;
   }): Favorite {
-    return new Favorite(params.id, params.userId, params.propertyId, params.createdAt);
+    return new Favorite(
+      params.id,
+      params.userId,
+      params.propertyId,
+      params.createdAt,
+    );
   }
 
   get id(): string {

@@ -14,7 +14,9 @@ export class FavoriteMapper {
     });
   }
 
-  static toPersistence(favorite: Favorite): Prisma.FavoriteUncheckedCreateInput {
+  static toPersistence(
+    favorite: Favorite,
+  ): Prisma.FavoriteUncheckedCreateInput {
     return {
       id: favorite.id,
       userId: favorite.userId,

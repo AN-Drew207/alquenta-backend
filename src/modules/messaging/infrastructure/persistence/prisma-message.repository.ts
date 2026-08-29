@@ -26,7 +26,7 @@ export class PrismaMessageRepository implements MessageRepository {
       orderBy: { createdAt: 'asc' },
       include: { author: true },
     });
-    return rows.map(MessageMapper.toDomain);
+    return rows.map((row) => MessageMapper.toDomain(row));
   }
 
   async markAsReadExcludingAuthor(

@@ -46,6 +46,7 @@ export class UserMapper {
       deactivatedBySuperadmin: row.deactivatedBySuperadmin,
       isVerified: row.isVerified,
       createdAt: row.createdAt,
+      parentAdminId: row.parentAdminId,
     });
   }
 
@@ -83,6 +84,7 @@ export class UserMapper {
       deactivatedBySuperadmin: user.deactivatedBySuperadmin,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
+      parentAdminId: user.parentAdminId,
     };
   }
 }

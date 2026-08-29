@@ -14,9 +14,7 @@ export class CreateReportUseCase implements UseCase<CreateReportCommand, void> {
   ) {}
 
   async execute(command: CreateReportCommand): Promise<void> {
-    const property = await this.propertyRepository.findById(
-      command.propertyId,
-    );
+    const property = await this.propertyRepository.findById(command.propertyId);
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }

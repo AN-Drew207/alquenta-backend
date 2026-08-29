@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { PropertyRepository } from '../../../domain/repositories/property.repository';
 import { PropertyNotOwnedByAdminException } from '../../../domain/exceptions/property-not-owned-by-admin.exception';
@@ -23,7 +24,12 @@ export class DeletePropertyUseCase implements UseCase<
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }
-    if (!property.belongsTo(command.adminId)) {
+
+    const isOwner =
+      command.role === Role.AGENT
+        ? property.managedByAgent(command.adminId)
+        : property.belongsTo(command.adminId);
+    if (!isOwner) {
       throw new PropertyNotOwnedByAdminException(command.propertyId);
     }
     if (property.status !== PropertyStatus.CANCELLED) {

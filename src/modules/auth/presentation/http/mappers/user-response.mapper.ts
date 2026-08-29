@@ -3,6 +3,7 @@ import { UserResponseDto } from '../dto/user-response.dto';
 import { PublicProfileResponseDto } from '../dto/public-profile-response.dto';
 import { ProfileResponseDto } from '../dto/profile-response.dto';
 import { AdminSummaryResponseDto } from '../dto/admin-summary-response.dto';
+import { AgentSummaryResponseDto } from '../dto/agent-summary-response.dto';
 
 export class UserResponseMapper {
   static toDto(user: User): UserResponseDto {
@@ -73,6 +74,17 @@ export class UserResponseMapper {
       createdAt: user.createdAt,
       deactivatedAt: user.deactivatedAt,
       isVerified: user.isVerified,
+    };
+  }
+
+  static toAgentSummaryDto(user: User): AgentSummaryResponseDto {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      createdAt: user.createdAt,
+      deactivatedAt: user.deactivatedAt,
     };
   }
 }

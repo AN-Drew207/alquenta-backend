@@ -12,6 +12,7 @@ export class PropertyMapper {
     return Property.reconstitute({
       id: row.id,
       adminId: row.adminId,
+      agentId: row.agentId,
       title: row.title,
       description: row.description,
       address: row.address,
@@ -41,6 +42,7 @@ export class PropertyMapper {
     return {
       id: property.id,
       adminId: property.adminId,
+      agentId: property.agentId,
       title: property.title,
       description: property.description,
       address: property.address,

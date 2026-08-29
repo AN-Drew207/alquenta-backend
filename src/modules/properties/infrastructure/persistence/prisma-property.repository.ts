@@ -47,6 +47,7 @@ export class PrismaPropertyRepository implements PropertyRepository {
         ...(filters.state && { state: filters.state }),
         ...(filters.municipality && { municipality: filters.municipality }),
         ...(filters.adminId && { adminId: filters.adminId }),
+        ...(filters.agentId && { agentId: filters.agentId }),
         ...(hasPriceRange && {
           price: {
             ...(filters.minPrice !== undefined && { gte: filters.minPrice }),

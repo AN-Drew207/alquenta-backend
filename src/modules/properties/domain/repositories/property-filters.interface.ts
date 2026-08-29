@@ -12,6 +12,7 @@ export interface PropertyFilters {
   state?: string;
   municipality?: string;
   adminId?: string;
+  agentId?: string;
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;

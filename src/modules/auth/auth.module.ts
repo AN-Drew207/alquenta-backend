@@ -27,10 +27,17 @@ import { EnableAdminUseCase } from './application/use-cases/enable-admin/enable-
 import { VerifyAdminUseCase } from './application/use-cases/verify-admin/verify-admin.use-case';
 import { UnverifyAdminUseCase } from './application/use-cases/unverify-admin/unverify-admin.use-case';
 import { DeleteAdminUseCase } from './application/use-cases/delete-admin/delete-admin.use-case';
+import { InviteAgentUseCase } from './application/use-cases/invite-agent/invite-agent.use-case';
+import { AcceptAgentInvitationUseCase } from './application/use-cases/accept-agent-invitation/accept-agent-invitation.use-case';
+import { ListAgentsUseCase } from './application/use-cases/list-agents/list-agents.use-case';
+import { DisableAgentUseCase } from './application/use-cases/disable-agent/disable-agent.use-case';
+import { EnableAgentUseCase } from './application/use-cases/enable-agent/enable-agent.use-case';
+import { DeleteAgentUseCase } from './application/use-cases/delete-agent/delete-agent.use-case';
 import { AuthController } from './presentation/http/auth.controller';
 import { ProfileController } from './presentation/http/profile.controller';
 import { AccountController } from './presentation/http/account.controller';
 import { SuperadminController } from './presentation/http/superadmin.controller';
+import { AgentsController } from './presentation/http/agents.controller';
 
 @Module({
   imports: [
@@ -53,6 +60,7 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
     ProfileController,
     AccountController,
     SuperadminController,
+    AgentsController,
   ],
   providers: [
     { provide: UserRepository, useClass: PrismaUserRepository },
@@ -74,6 +82,12 @@ import { SuperadminController } from './presentation/http/superadmin.controller'
     VerifyAdminUseCase,
     UnverifyAdminUseCase,
     DeleteAdminUseCase,
+    InviteAgentUseCase,
+    AcceptAgentInvitationUseCase,
+    ListAgentsUseCase,
+    DisableAgentUseCase,
+    EnableAgentUseCase,
+    DeleteAgentUseCase,
     JwtStrategy,
   ],
   exports: [UserRepository],

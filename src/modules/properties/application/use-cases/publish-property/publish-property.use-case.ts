@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
+import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { Property } from '../../../domain/entities/property.entity';
 import { PropertyRepository } from '../../../domain/repositories/property.repository';
 import { ActiveListingsLimitExceededException } from '../../../domain/exceptions/active-listings-limit-exceeded.exception';
+import { AgentNotInAgencyException } from '../../../domain/exceptions/agent-not-in-agency.exception';
 import { UserRepository } from '../../../../auth/domain/repositories/user.repository';
 import { PlanRepository } from '../../../../plans/domain/repositories/plan.repository';
 import { PublishPropertyCommand } from './publish-property.command';
@@ -19,10 +22,13 @@ export class PublishPropertyUseCase implements UseCase<
   ) {}
 
   async execute(command: PublishPropertyCommand): Promise<Property> {
-    await this.assertWithinActiveListingsLimit(command.adminId);
+    const { adminId, agentId } = await this.resolveOwnership(command);
+
+    await this.assertWithinActiveListingsLimit(adminId);
 
     const property = Property.publish({
-      adminId: command.adminId,
+      adminId,
+      agentId,
       title: command.title,
       description: command.description,
       address: command.address,
@@ -44,6 +50,40 @@ export class PublishPropertyUseCase implements UseCase<
 
     await this.propertyRepository.save(property);
     return property;
+  }
+
+  /**
+   * Resolves the real ownership pair (adminId, agentId) for a new listing:
+   * - AGENT: the listing is attributed to their parent agency's admin, but
+   *   tagged with the agent as the manager.
+   * - ADMIN publishing on behalf of one of their agents (agentId in the
+   *   command): validated to actually belong to their agency.
+   * - ADMIN publishing directly: no agent attribution.
+   */
+  private async resolveOwnership(
+    command: PublishPropertyCommand,
+  ): Promise<{ adminId: string; agentId: string | null }> {
+    if (command.role === Role.AGENT) {
+      const agent = await this.userRepository.findById(command.userId);
+      if (!agent || !agent.parentAdminId) {
+        throw new EntityNotFoundException('Admin', command.userId);
+      }
+      return { adminId: agent.parentAdminId, agentId: agent.id };
+    }
+
+    if (command.agentId) {
+      const agent = await this.userRepository.findById(command.agentId);
+      if (
+        !agent ||
+        agent.role !== Role.AGENT ||
+        agent.parentAdminId !== command.userId
+      ) {
+        throw new AgentNotInAgencyException(command.agentId);
+      }
+      return { adminId: command.userId, agentId: agent.id };
+    }
+
+    return { adminId: command.userId, agentId: null };
   }
 
   private async assertWithinActiveListingsLimit(

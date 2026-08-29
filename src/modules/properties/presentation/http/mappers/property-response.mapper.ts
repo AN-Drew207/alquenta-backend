@@ -10,6 +10,7 @@ export class PropertyResponseMapper {
     return {
       id: property.id,
       adminId: property.adminId,
+      agentId: property.agentId,
       title: property.title,
       description: property.description,
       address: property.address,

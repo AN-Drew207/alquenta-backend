@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUUID,
 } from 'class-validator';
 import { PropertyType } from '../../../domain/enums/property-type.enum';
 import { OperationType } from '../../../domain/enums/operation-type.enum';
@@ -117,4 +118,13 @@ export class CreatePropertyRequestDto {
   @IsOptional()
   @IsLongitude()
   longitude?: number;
+
+  @ApiProperty({
+    required: false,
+    description:
+      "Assign this listing to one of the admin's agents (ADMIN only — ignored/not accepted when publishing as an AGENT, who is always attributed to themself).",
+  })
+  @IsOptional()
+  @IsUUID()
+  agentId?: string;
 }

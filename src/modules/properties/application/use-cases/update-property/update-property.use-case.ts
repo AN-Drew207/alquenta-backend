@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../../../../../shared/application/use-case.interface';
+import { Role } from '../../../../../shared/domain/role.enum';
 import { EntityNotFoundException } from '../../../../../shared/domain/exceptions/entity-not-found.exception';
 import { Property } from '../../../domain/entities/property.entity';
 import { PropertyRepository } from '../../../domain/repositories/property.repository';
@@ -18,7 +19,12 @@ export class UpdatePropertyUseCase implements UseCase<
     if (!property) {
       throw new EntityNotFoundException('Property', command.propertyId);
     }
-    if (!property.belongsTo(command.adminId)) {
+
+    const isOwner =
+      command.role === Role.AGENT
+        ? property.managedByAgent(command.adminId)
+        : property.belongsTo(command.adminId);
+    if (!isOwner) {
       throw new PropertyNotOwnedByAdminException(command.propertyId);
     }
 

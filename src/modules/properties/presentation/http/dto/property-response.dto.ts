@@ -10,6 +10,9 @@ export class PropertyResponseDto {
   @ApiProperty()
   adminId: string;
 
+  @ApiProperty({ required: false, nullable: true })
+  agentId: string | null;
+
   @ApiProperty()
   title: string;
 

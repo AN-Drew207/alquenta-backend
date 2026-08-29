@@ -15,6 +15,7 @@ enum Role {
   ADMIN
   CLIENT
   SUPERADMIN
+  AGENT
 }
 
 enum PlanTier {
@@ -97,6 +98,9 @@ model User {
   accountType  AccountType @default(CLIENT)
   planId       String?
   plan         Plan?    @relation(fields: [planId], references: [id])
+  parentAdminId String?
+  parentAdmin  User?    @relation("AgencyAgents", fields: [parentAdminId], references: [id], onDelete: Cascade)
+  agents       User[]   @relation("AgencyAgents")
   avatarUrl    String?
   bio          String?
   city         String?
@@ -119,6 +123,7 @@ model User {
   updatedAt    DateTime @updatedAt
 
   properties               Property[]     @relation("AdminProperties")
+  agentProperties          Property[]     @relation("AgentProperties")
   conversationsAsClient    Conversation[] @relation("ClientConversations")
   conversationsAsAdmin     Conversation[] @relation("AdminConversations")
   messages                 Message[]      @relation("MessageAuthor")
@@ -144,6 +149,8 @@ model Property {
   id            String         @id @default(uuid())
   adminId       String
   admin         User           @relation("AdminProperties", fields: [adminId], references: [id], onDelete: Cascade)
+  agentId       String?
+  agent         User?          @relation("AgentProperties", fields: [agentId], references: [id], onDelete: SetNull)
   title         String
   description   String
   address       String

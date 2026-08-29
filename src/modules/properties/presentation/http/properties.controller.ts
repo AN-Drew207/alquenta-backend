@@ -85,16 +85,17 @@ export class PropertiesController {
   }
 
   @ApiOperation({
-    summary: "List the authenticated admin's own properties, any status",
+    summary:
+      "List the authenticated admin's or agent's own properties, any status",
   })
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.AGENT)
   @Get('mine')
   async listMyProperties(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<PropertyResponseDto[]> {
-    const properties = await this.listUseCase.execute({
-      adminId: user.id,
-    });
+    const properties = await this.listUseCase.execute(
+      user.role === Role.AGENT ? { agentId: user.id } : { adminId: user.id },
+    );
     return properties.map((property) => PropertyResponseMapper.toDto(property));
   }
 
@@ -139,8 +140,10 @@ export class PropertiesController {
     return { whatsapp };
   }
 
-  @ApiOperation({ summary: 'Publish a new property listing (ADMIN only)' })
-  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'Publish a new property listing (ADMIN or AGENT)',
+  })
+  @Roles(Role.ADMIN, Role.AGENT)
   @Post()
   async publish(
     @Body() dto: CreatePropertyRequestDto,
@@ -149,6 +152,7 @@ export class PropertiesController {
     const property = await this.publishUseCase.execute(
       new PublishPropertyCommand(
         user.id,
+        user.role,
         dto.title,
         dto.description,
         dto.address,
@@ -166,15 +170,16 @@ export class PropertiesController {
         dto.whatsapp,
         dto.latitude,
         dto.longitude,
+        dto.agentId,
       ),
     );
     return PropertyResponseMapper.toDto(property);
   }
 
   @ApiOperation({
-    summary: 'Update a property (ADMIN only, must own the property)',
+    summary: 'Update a property (ADMIN or AGENT, must own/manage the property)',
   })
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.AGENT)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -182,22 +187,24 @@ export class PropertiesController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<PropertyResponseDto> {
     const property = await this.updateUseCase.execute(
-      new UpdatePropertyCommand(id, user.id, dto),
+      new UpdatePropertyCommand(id, user.id, dto, user.role),
     );
     return PropertyResponseMapper.toDto(property);
   }
 
   @ApiOperation({
-    summary: 'Delete a property (ADMIN only, must own the property)',
+    summary: 'Delete a property (ADMIN or AGENT, must own/manage the property)',
   })
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.AGENT)
   @Delete(':id')
   @HttpCode(204)
   async delete(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    await this.deleteUseCase.execute(new DeletePropertyCommand(id, user.id));
+    await this.deleteUseCase.execute(
+      new DeletePropertyCommand(id, user.id, user.role),
+    );
   }
 
   @ApiOperation({

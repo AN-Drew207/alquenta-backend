@@ -50,10 +50,12 @@ export class Property {
     private _longitude: number | null,
     private _cancelledAt: Date | null,
     private readonly _createdAt: Date,
+    private readonly _agentId: string | null,
   ) {}
 
   static publish(params: {
     adminId: string;
+    agentId?: string | null;
     title: string;
     description: string;
     address: string;
@@ -98,12 +100,14 @@ export class Property {
       params.longitude ?? null,
       null,
       new Date(),
+      params.agentId ?? null,
     );
   }
 
   static reconstitute(params: {
     id: string;
     adminId: string;
+    agentId?: string | null;
     title: string;
     description: string;
     address: string;
@@ -148,11 +152,16 @@ export class Property {
       params.longitude,
       params.cancelledAt,
       params.createdAt,
+      params.agentId ?? null,
     );
   }
 
   belongsTo(adminId: string): boolean {
     return this._adminId === adminId;
+  }
+
+  managedByAgent(agentId: string): boolean {
+    return this._agentId === agentId;
   }
 
   updateDetails(changes: PropertyChanges): void {
@@ -203,6 +212,10 @@ export class Property {
 
   get adminId(): string {
     return this._adminId;
+  }
+
+  get agentId(): string | null {
+    return this._agentId;
   }
 
   get title(): string {

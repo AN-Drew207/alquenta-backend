@@ -77,6 +77,7 @@ export class User {
     private _deactivatedBySuperadmin: boolean,
     private _isVerified: boolean,
     private readonly _createdAt: Date,
+    private readonly _parentAdminId: string | null,
   ) {}
 
   static create(params: {
@@ -86,6 +87,7 @@ export class User {
     role: Role;
     phone?: string | null;
     planId?: string | null;
+    parentAdminId?: string | null;
   }): User {
     const { firstName, lastName } = splitName(params.name);
     return new User(
@@ -120,6 +122,7 @@ export class User {
       false,
       false,
       new Date(),
+      params.parentAdminId ?? null,
     );
   }
 
@@ -155,6 +158,7 @@ export class User {
     deactivatedBySuperadmin: boolean;
     isVerified: boolean;
     createdAt: Date;
+    parentAdminId?: string | null;
   }): User {
     return new User(
       params.id,
@@ -188,6 +192,7 @@ export class User {
       params.deactivatedBySuperadmin,
       params.isVerified,
       params.createdAt,
+      params.parentAdminId ?? null,
     );
   }
 
@@ -382,6 +387,10 @@ export class User {
 
   get createdAt(): Date {
     return this._createdAt;
+  }
+
+  get parentAdminId(): string | null {
+    return this._parentAdminId;
   }
 
   /**

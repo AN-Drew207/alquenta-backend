@@ -27,6 +27,8 @@ import { UpdateProfileUseCase } from '../../application/use-cases/update-profile
 import { UpdateProfileCommand } from '../../application/use-cases/update-profile/update-profile.command';
 import { AcceptAdminInvitationUseCase } from '../../application/use-cases/accept-admin-invitation/accept-admin-invitation.use-case';
 import { AcceptAdminInvitationCommand } from '../../application/use-cases/accept-admin-invitation/accept-admin-invitation.command';
+import { AcceptAgentInvitationUseCase } from '../../application/use-cases/accept-agent-invitation/accept-agent-invitation.use-case';
+import { AcceptAgentInvitationCommand } from '../../application/use-cases/accept-agent-invitation/accept-agent-invitation.command';
 import { User } from '../../domain/entities/user.entity';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { Session } from '../../domain/entities/session.entity';
@@ -36,6 +38,7 @@ import { LoginRequestDto } from './dto/login-request.dto';
 import { ReactivateAccountRequestDto } from './dto/reactivate-account-request.dto';
 import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 import { AcceptAdminInvitationRequestDto } from './dto/accept-admin-invitation-request.dto';
+import { AcceptAgentInvitationRequestDto } from './dto/accept-agent-invitation-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PublicProfileResponseDto } from './dto/public-profile-response.dto';
 import { UserResponseMapper } from './mappers/user-response.mapper';
@@ -50,6 +53,7 @@ export class AuthController {
     private readonly reactivateAccountUseCase: ReactivateAccountUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
     private readonly acceptAdminInvitationUseCase: AcceptAdminInvitationUseCase,
+    private readonly acceptAgentInvitationUseCase: AcceptAgentInvitationUseCase,
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
     private readonly sessionRepository: SessionRepository,
@@ -166,6 +170,24 @@ export class AuthController {
   ): Promise<UserResponseDto> {
     const user = await this.acceptAdminInvitationUseCase.execute(
       new AcceptAdminInvitationCommand(dto.token, dto.name, dto.password),
+    );
+    await this.createSessionAndSetCookie(req, res, user);
+    return UserResponseMapper.toDto(user);
+  }
+
+  @ApiOperation({
+    summary:
+      'Accept an agent invitation link, create the AGENT account and sign in',
+  })
+  @Public()
+  @Post('agent-invite/accept')
+  async acceptAgentInvitation(
+    @Body() dto: AcceptAgentInvitationRequestDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<UserResponseDto> {
+    const user = await this.acceptAgentInvitationUseCase.execute(
+      new AcceptAgentInvitationCommand(dto.token, dto.name, dto.password),
     );
     await this.createSessionAndSetCookie(req, res, user);
     return UserResponseMapper.toDto(user);

@@ -44,6 +44,14 @@ export class PrismaUserRepository implements UserRepository {
     return rows.map((row) => UserMapper.toDomain(row));
   }
 
+  async findManyByParentAdminId(parentAdminId: string): Promise<User[]> {
+    const rows = await this.prisma.user.findMany({
+      where: { parentAdminId, role: Role.AGENT },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map((row) => UserMapper.toDomain(row));
+  }
+
   async delete(id: string): Promise<void> {
     await this.prisma.user.delete({ where: { id } });
   }
